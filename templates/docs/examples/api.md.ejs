@@ -1,0 +1,17 @@
+# API layer example
+
+**Choice:** <%= stackLabels.apiLayer %>
+
+## When to use
+
+All HTTP traffic should go through a single module for base URL, headers, and error logging.
+
+## Best practice
+
+- Type responses at the boundary.
+- Surface user-friendly errors in UI; log technical details to monitoring.
+- Do not scatter `fetch`/`axios` calls across components.
+
+## Snippet
+
+`src/services/api.<%= ext %>` — `apiGet`, `apiPost`, `fetchPosts`, `createFeedback`.

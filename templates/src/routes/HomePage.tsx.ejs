@@ -1,0 +1,47 @@
+import { CounterPanel } from '@/features/counter/CounterPanel';
+import { PostsPanel } from '@/features/posts/PostsPanel';
+import { FeedbackForm } from '@/features/feedback/FeedbackForm';
+import { StackBadge } from '@/components/StackBadge';
+import { useToast } from '@/components/ui/Toast';
+import { UiButton } from '@/components/ui/UiButton';
+
+export function HomePage() {
+  const { push } = useToast();
+
+  return (
+    <div className="page home-page">
+      <section className="hero">
+        <p className="eyebrow">Starter workspace</p>
+        <h1><%= projectName %></h1>
+        <p className="lede">
+          A minimal, production-shaped React app wired for your selected stack. Explore the panels
+          below — each one is a real usage example, not a placeholder.
+        </p>
+        <div className="hero-actions">
+          <UiButton onClick={() => push('Toast system is ready', 'success')}>
+            Show toast
+          </UiButton>
+          <a className="text-link" href="/about">
+            Read about the stack →
+          </a>
+        </div>
+        <div className="stack-row">
+          <StackBadge label="Build" value="<%= stackLabels.buildTool %>" />
+          <StackBadge label="Language" value="<%= stackLabels.language %>" />
+          <StackBadge label="Router" value="<%= stackLabels.router %>" />
+          <StackBadge label="State" value="<%= stackLabels.stateManagement %>" />
+          <StackBadge label="Data" value="<%= stackLabels.serverState %>" />
+          <StackBadge label="UI" value="<%= stackLabels.uiLibrary %>" />
+        </div>
+      </section>
+
+      <section className="panels">
+<% if (stateManagement !== 'none') { -%>
+        <CounterPanel />
+<% } -%>
+        <PostsPanel />
+        <FeedbackForm />
+      </section>
+    </div>
+  );
+}

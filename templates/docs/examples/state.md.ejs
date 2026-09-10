@@ -1,0 +1,17 @@
+# Client state example
+
+**Library:** <%= stackLabels.stateManagement %>
+
+**Live demo:** Counter panel on `/`
+
+## When to use
+
+Shared interactive state that is not fetched from an API (wizard steps, UI toggles, local counters).
+
+## Best practice
+
+Keep stores/slices focused. Prefer feature-local state; promote to global only when multiple distant trees need it.
+
+## Snippet
+
+See `src/features/counter/CounterPanel.<%= jsxExt %>` and `src/store/`.

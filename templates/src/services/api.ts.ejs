@@ -1,0 +1,84 @@
+<% if (apiLayer === 'axios') { -%>
+import axios from 'axios';
+import { env } from '@/config/env';
+
+const baseURL = env.apiBaseUrl;
+
+export const apiClient = axios.create({
+  baseURL,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10_000,
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('[api]', error);
+    return Promise.reject(error);
+  },
+);
+
+export async function apiGet<% if (isTypeScript) { %><T = unknown><% } %>(path<% if (isTypeScript) { %>: string<% } %>)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.get<% if (isTypeScript) { %><T><% } %>(path);
+  return data;
+}
+
+export async function apiPost<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>: B<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.post<% if (isTypeScript) { %><T><% } %>(path, body);
+  return data;
+}
+<% } else { -%>
+import { env } from '@/config/env';
+
+const baseURL = env.apiBaseUrl;
+
+async function request<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  init<% if (isTypeScript) { %>?: RequestInit<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const response = await fetch(`${baseURL}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    ...init,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function apiGet<% if (isTypeScript) { %><T = unknown><% } %>(path<% if (isTypeScript) { %>: string<% } %>)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path);
+}
+
+export async function apiPost<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>: B<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+<% } -%>
+
+<% if (isTypeScript) { -%>
+export interface Post {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
+<% } -%>
+
+export async function fetchPosts() {
+  return apiGet<% if (isTypeScript) { %><Post[]><% } %>('/posts?_limit=5');
+}
+
+export async function createFeedback(payload<% if (isTypeScript) { %>: { name: string; email: string; message: string }<% } %>) {
+  return apiPost('/posts', payload);
+}

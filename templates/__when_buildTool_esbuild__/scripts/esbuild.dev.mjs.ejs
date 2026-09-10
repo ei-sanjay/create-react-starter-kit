@@ -1,0 +1,48 @@
+import * as esbuild from 'esbuild';
+import { createServer } from 'node:http';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+
+const ctx = await esbuild.context({
+  entryPoints: ['src/main.<%= jsxExt %>'],
+  bundle: true,
+  outfile: 'dist/main.js',
+  format: 'esm',
+  sourcemap: true,
+  alias: {
+    '@': path.resolve('src'),
+  },
+  loader: {
+    '.<%= jsxExt %>': '<%= isTypeScript ? 'tsx' : 'jsx' %>',
+    '.css': 'css',
+  },
+  define: {
+    'process.env.NODE_ENV': '"development"',
+  },
+});
+
+await ctx.watch();
+
+const server = createServer((req, res) => {
+  const url = req.url === '/' ? '/index.html' : req.url;
+  const filePath = path.join(process.cwd(), url.startsWith('/dist') ? '.' : '', url === '/index.html' ? 'index.html' : url.slice(1));
+  const resolved = url === '/index.html' ? path.join(process.cwd(), 'index.html') : path.join(process.cwd(), url.slice(1));
+  if (!existsSync(resolved)) {
+    res.writeHead(404);
+    res.end('Not found');
+    return;
+  }
+  const content = readFileSync(resolved);
+  const type = resolved.endsWith('.js')
+    ? 'text/javascript'
+    : resolved.endsWith('.css')
+      ? 'text/css'
+      : 'text/html';
+  res.writeHead(200, { 'Content-Type': type });
+  res.end(content);
+  void filePath;
+});
+
+server.listen(5173, () => {
+  console.log('esbuild app at http://localhost:5173');
+});

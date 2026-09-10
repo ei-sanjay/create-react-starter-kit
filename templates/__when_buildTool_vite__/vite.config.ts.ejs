@@ -1,0 +1,37 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+<% if (unitTesting === 'vitest') { -%>
+import { defineConfig as defineVitestConfig, mergeConfig } from 'vitest/config';
+<% } -%>
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
+
+const viteConfig = defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(rootDir, 'src'),
+    },
+  },
+  server: {
+    port: 5173,
+  },
+});
+
+<% if (unitTesting === 'vitest') { -%>
+export default mergeConfig(
+  viteConfig,
+  defineVitestConfig({
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './tests/setup.<%= ext %>',
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/*.e2e.*'],
+    },
+  }),
+);
+<% } else { -%>
+export default viteConfig;
+<% } -%>

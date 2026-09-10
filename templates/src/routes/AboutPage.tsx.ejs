@@ -1,0 +1,30 @@
+export function AboutPage() {
+  return (
+    <div className="page about-page">
+      <h1>About this starter</h1>
+      <p>
+        Generated with <strong>create-react-starter-kit</strong> using a scalable{' '}
+        <strong>feature-based</strong> layout (domain modules under <code>src/features</code>) —
+        the same organizational approach used across large production React codebases.
+      </p>
+      <ul className="about-list">
+        <li>
+          <strong>Extend features</strong> under <code>src/features/&lt;name&gt;/</code> — keep
+          domain logic close to the UI that owns it.
+        </li>
+        <li>
+          <strong>Shared primitives</strong> live in <code>src/components/</code> and{' '}
+          <code>src/lib/</code>. Prefer imports via the <code>@/</code> path alias.
+        </li>
+        <li>
+          <strong>Docs</strong> in <code>docs/</code> explain architecture, testing, and production
+          habits for this stack.
+        </li>
+      </ul>
+      <p>
+        Prefer reading <code>docs/getting-started.md</code> next, then{' '}
+        <code>docs/selected-stack.md</code> for library-specific guidance.
+      </p>
+    </div>
+  );
+}

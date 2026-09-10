@@ -1,0 +1,168 @@
+<% if (isTypeScript) { -%>
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
+<% } -%>
+import { cn } from '@/lib/cn';
+<% if (uiLibrary === 'mui') { -%>
+import Button from '@mui/material/Button';
+<% } else if (uiLibrary === 'antd') { -%>
+import { Button as AntButton } from 'antd';
+<% } else if (uiLibrary === 'chakra') { -%>
+import { Button as ChakraButton } from '@chakra-ui/react';
+<% } else if (uiLibrary === 'headless-ui') { -%>
+import { Button as HeadlessButton } from '@headlessui/react';
+<% } else if (uiLibrary === 'shadcn') { -%>
+import { cva<% if (isTypeScript) { %>, type VariantProps<% } %> } from 'class-variance-authority';
+<% } -%>
+
+<% if (uiLibrary === 'shadcn') { -%>
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-brand-600 text-white hover:bg-brand-700',
+        secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200',
+        outline: 'border border-slate-300 bg-white hover:bg-slate-50',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-8 px-3',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
+
+<% if (isTypeScript) { -%>
+export interface UiButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  children: ReactNode;
+}
+<% } -%>
+
+export function UiButton({
+  className,
+  variant,
+  size,
+  children,
+  ...props
+}<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <button className={cn(buttonVariants({ variant, size }), className)} {...props}>
+      {children}
+    </button>
+  );
+}
+<% } else if (uiLibrary === 'mui') { -%>
+<% if (isTypeScript) { -%>
+interface UiButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: 'contained' | 'outlined' | 'text';
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
+<% } -%>
+
+export function UiButton({
+  children,
+  onClick,
+  variant = 'contained',
+  type = 'button',
+  disabled,
+}<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <Button variant={variant} onClick={onClick} type={type} disabled={disabled}>
+      {children}
+    </Button>
+  );
+}
+<% } else if (uiLibrary === 'antd') { -%>
+<% if (isTypeScript) { -%>
+interface UiButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  type?: 'default' | 'primary' | 'dashed' | 'link' | 'text';
+  htmlType?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
+<% } -%>
+
+export function UiButton({
+  children,
+  onClick,
+  type = 'primary',
+  htmlType = 'button',
+  disabled,
+}<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <AntButton type={type} onClick={onClick} htmlType={htmlType} disabled={disabled}>
+      {children}
+    </AntButton>
+  );
+}
+<% } else if (uiLibrary === 'chakra') { -%>
+<% if (isTypeScript) { -%>
+interface UiButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
+<% } -%>
+
+export function UiButton({ children, onClick, type = 'button', disabled }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <ChakraButton colorPalette="blue" onClick={onClick} type={type} disabled={disabled}>
+      {children}
+    </ChakraButton>
+  );
+}
+<% } else if (uiLibrary === 'headless-ui') { -%>
+<% if (isTypeScript) { -%>
+interface UiButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  className?: string;
+}
+<% } -%>
+
+export function UiButton({
+  children,
+  onClick,
+  type = 'button',
+  disabled,
+  className,
+}<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <HeadlessButton
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={cn('ui-button', className)}
+    >
+      {children}
+    </HeadlessButton>
+  );
+}
+<% } else { -%>
+<% if (isTypeScript) { -%>
+interface UiButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+}
+<% } -%>
+
+export function UiButton({ children, className, ...props }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+  return (
+    <button className={cn('ui-button', className)} {...props}>
+      {children}
+    </button>
+  );
+}
+<% } -%>

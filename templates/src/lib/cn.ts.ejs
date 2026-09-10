@@ -1,0 +1,12 @@
+<% if (uiLibrary === 'shadcn') { -%>
+import { clsx<% if (isTypeScript) { %>, type ClassValue<% } %> } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs<% if (isTypeScript) { %>: ClassValue[]<% } %>) {
+  return twMerge(clsx(inputs));
+}
+<% } else { -%>
+export function cn(...parts<% if (isTypeScript) { %>: Array<string | false | null | undefined><% } %>) {
+  return parts.filter(Boolean).join(' ');
+}
+<% } -%>

@@ -1,0 +1,62 @@
+{
+  "name": "create-react-starter-kit",
+  "version": "1.0.0",
+  "description": "Interactive CLI to scaffold a production-ready React app with your preferred stack",
+  "keywords": [
+    "react",
+    "starter-kit",
+    "boilerplate",
+    "scaffold",
+    "cli",
+    "create-react-app",
+    "vite",
+    "typescript",
+    "generator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-react-starter-kit": "./bin/create-react-starter-kit.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/copy-templates.mjs",
+    "dev": "tsc --watch",
+    "start": "node bin/create-react-starter-kit.js",
+    "validate": "npm run build && node scripts/validate-cli.mjs",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "ejs": "^3.1.10",
+    "execa": "^9.5.2",
+    "fs-extra": "^11.3.0",
+    "inquirer": "^12.4.2",
+    "ora": "^8.2.0",
+    "validate-npm-package-name": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.13.10",
+    "@types/validate-npm-package-name": "^3.0.3",
+    "typescript": "^5.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/example/create-react-starter-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/example/create-react-starter-kit/issues"
+  },
+  "homepage": "https://github.com/example/create-react-starter-kit#readme"
+}

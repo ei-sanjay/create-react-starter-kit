@@ -1,0 +1,74 @@
+# Architecture
+
+## Why this stack
+
+You selected a coherent default-friendly stack during scaffolding. The generator wires providers, scripts, and a demo page so packages are not orphaned in `package.json`.
+
+| Concern | Choice | Role |
+|---------|--------|------|
+| Bundler | <%= stackLabels.buildTool %> | Dev server + production build |
+| Language | <%= stackLabels.language %> | Source language / typing |
+| Routing | <%= stackLabels.router %> | URL → UI mapping |
+| Client state | <%= stackLabels.stateManagement %> | Local interactive state |
+| Server state | <%= stackLabels.serverState %> | Remote data cache |
+| Forms | <%= stackLabels.forms %> | Form state & submit |
+| Validation | <%= stackLabels.validation %> | Schema rules |
+| Styling | <%= stackLabels.styling %> | Visual system |
+| UI kit | <%= stackLabels.uiLibrary %> | Components / primitives |
+| API | <%= stackLabels.apiLayer %> | HTTP transport |
+
+## Folder organization (feature-based)
+
+This scaffold uses a **feature-based / domain-driven** layout — the pattern most large React teams settle on as apps grow (similar in spirit to how companies structure product domains: keep code that changes together close together).
+
+```text
+src/
+  app/           # bootstrap, providers, root App shell
+  assets/        # images, fonts, static media imported from code
+  components/    # shared, feature-agnostic UI (layout/, ui/)
+  config/        # env helpers and app-level constants
+  features/      # domain modules (counter, posts, feedback, …)
+  hooks/         # shared hooks
+  lib/           # third-party wrappers / cross-cutting helpers
+  routes/        # route-level pages
+  services/      # API clients / transport
+  store/         # global client state (when selected)
+  styles/        # global styles / tokens
+  types/         # shared TypeScript types
+  utils/         # pure helpers
+```
+
+**Rules of thumb**
+
+- Put new product work in `src/features/<domain>/`.
+- Keep `components/` dumb and reusable.
+- Import with the `@/` alias (e.g. `import { apiGet } from '@/services/api'`).
+- Prefer a feature's public surface over deep cross-feature imports.
+
+## Path aliases
+
+`@/*` maps to `src/*` in TypeScript/JS config and in your bundler (`<%= stackLabels.buildTool %>`).
+
+```ts
+import { HomePage } from '@/routes/HomePage';
+import { useToast } from '@/components/ui/Toast';
+```
+
+## Runtime composition
+
+`src/main.<%= jsxExt %>` → providers (`src/app/providers.<%= jsxExt %>`) → router (`src/app/App.<%= jsxExt %>`) → layouts/pages.
+
+Providers are ordered deliberately: state → server cache → UI theme → toasts.
+
+## Boundaries
+
+- **UI** must not call `fetch`/`axios` directly in deep leaves — go through `services/`.
+- **Schemas** live in `lib/validation` so forms and API payloads share rules.
+- **Env access** stays in `config/`, `services/`, and `lib/monitoring`.
+
+## Production readiness patterns
+
+- Code-split heavy routes when the app grows.
+- Fail closed on missing monitoring DSN (already gated).
+- Keep lint/format/test scripts green in CI.
+- Document public env vars only in `.env.example`.

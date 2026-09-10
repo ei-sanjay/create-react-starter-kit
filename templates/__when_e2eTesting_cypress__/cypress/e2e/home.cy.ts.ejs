@@ -1,0 +1,6 @@
+describe('Home', () => {
+  it('loads the starter', () => {
+    cy.visit('/');
+    cy.contains('<%= projectName %>');
+  });
+});

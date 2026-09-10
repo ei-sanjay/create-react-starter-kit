@@ -1,0 +1,18 @@
+# Data fetching example
+
+**Library:** <%= stackLabels.serverState %>
+**Transport:** <%= stackLabels.apiLayer %>
+
+**Live demo:** Posts panel on `/`
+
+## When to use
+
+Any remote read/write that benefits from caching, deduplication, retries, or background refresh.
+
+## Best practice
+
+Separate server cache from client UI state. Key queries by resource identity, not by component instance.
+
+## Snippet
+
+See `src/features/posts/PostsPanel.<%= jsxExt %>` and `src/services/api.<%= ext %>`.

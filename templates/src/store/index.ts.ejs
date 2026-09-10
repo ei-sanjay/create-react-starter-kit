@@ -1,0 +1,80 @@
+<% if (stateManagement === 'redux') { -%>
+import { configureStore, createSlice } from '@reduxjs/toolkit';
+<% if (isTypeScript) { -%>
+import type { PayloadAction } from '@reduxjs/toolkit';
+<% } -%>
+<% if (serverState === 'rtk-query') { -%>
+import { postsApi } from './postsApi';
+<% } -%>
+
+<% if (isTypeScript) { -%>
+interface CounterState {
+  value: number;
+}
+<% } -%>
+
+const initialState<% if (isTypeScript) { %>: CounterState<% } %> = { value: 0 };
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {
+    increment(state) {
+      state.value += 1;
+    },
+    decrement(state) {
+      state.value -= 1;
+    },
+    setValue(state, action<% if (isTypeScript) { %>: PayloadAction<number><% } %>) {
+      state.value = action.payload;
+    },
+  },
+});
+
+export const { increment, decrement, setValue } = counterSlice.actions;
+
+export const store = configureStore({
+  reducer: {
+    counter: counterSlice.reducer,
+<% if (serverState === 'rtk-query') { -%>
+    [postsApi.reducerPath]: postsApi.reducer,
+<% } -%>
+  },
+<% if (serverState === 'rtk-query') { -%>
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(postsApi.middleware),
+<% } -%>
+});
+
+<% if (isTypeScript) { -%>
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+<% } -%>
+<% } else if (stateManagement === 'zustand') { -%>
+import { create } from 'zustand';
+
+<% if (isTypeScript) { -%>
+interface CounterStore {
+  value: number;
+  increment: () => void;
+  decrement: () => void;
+  setValue: (value: number) => void;
+}
+<% } -%>
+
+export const useCounterStore = create<% if (isTypeScript) { %><CounterStore><% } %>((set) => ({
+  value: 0,
+  increment: () => set((state) => ({ value: state.value + 1 })),
+  decrement: () => set((state) => ({ value: state.value - 1 })),
+  setValue: (value) => set({ value }),
+}));
+<% } else if (stateManagement === 'jotai') { -%>
+import { atom } from 'jotai';
+
+export const counterAtom = atom(0);
+<% } else if (stateManagement === 'context') { -%>
+export { AppStateProvider, useAppState } from './context';
+<% } else { -%>
+// Client state management was set to "None".
+export {};
+<% } -%>

@@ -1,0 +1,19 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+<% if (isTypeScript) { -%>
+import type { Post } from '@/services/api';
+<% } -%>
+import { env } from '@/config/env';
+
+const baseUrl = env.apiBaseUrl;
+
+export const postsApi = createApi({
+  reducerPath: 'postsApi',
+  baseQuery: fetchBaseQuery({ baseUrl }),
+  endpoints: (builder) => ({
+    getPosts: builder.query<% if (isTypeScript) { %><Post[], void><% } %>({
+      query: () => '/posts?_limit=5',
+    }),
+  }),
+});
+
+export const { useGetPostsQuery } = postsApi;

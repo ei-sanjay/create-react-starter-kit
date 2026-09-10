@@ -1,0 +1,93 @@
+<% if (isTypeScript) { -%>
+import type { ReactNode } from 'react';
+<% } -%>
+<% if (serverState === 'tanstack-query') { -%>
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+<% } -%>
+<% if (serverState === 'swr') { -%>
+import { SWRConfig } from 'swr';
+import { apiGet } from '@/services/api';
+<% } -%>
+<% if (stateManagement === 'redux') { -%>
+import { Provider } from 'react-redux';
+import { store } from '@/store';
+<% } -%>
+<% if (stateManagement === 'jotai') { -%>
+import { Provider as JotaiProvider } from 'jotai';
+<% } -%>
+<% if (stateManagement === 'context') { -%>
+import { AppStateProvider } from '@/store/context';
+<% } -%>
+<% if (uiLibrary === 'chakra') { -%>
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
+<% } -%>
+<% if (uiLibrary === 'mui') { -%>
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+<% } -%>
+import { ToastProvider } from '@/components/ui/Toast';
+
+<% if (serverState === 'tanstack-query') { -%>
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+    },
+  },
+});
+<% } -%>
+<% if (uiLibrary === 'mui') { -%>
+const theme = createTheme({
+  palette: {
+    primary: { main: '#1d4ed8' },
+  },
+});
+<% } -%>
+
+<% if (isTypeScript) { -%>
+interface AppProvidersProps {
+  children: ReactNode;
+}
+<% } -%>
+
+export function AppProviders({ children }<% if (isTypeScript) { %>: AppProvidersProps<% } %>) {
+  let tree = children;
+
+<% if (stateManagement === 'context') { -%>
+  tree = <AppStateProvider>{tree}</AppStateProvider>;
+<% } -%>
+<% if (stateManagement === 'jotai') { -%>
+  tree = <JotaiProvider>{tree}</JotaiProvider>;
+<% } -%>
+<% if (stateManagement === 'redux') { -%>
+  tree = <Provider store={store}>{tree}</Provider>;
+<% } -%>
+<% if (serverState === 'tanstack-query') { -%>
+  tree = <QueryClientProvider client={queryClient}>{tree}</QueryClientProvider>;
+<% } -%>
+<% if (serverState === 'swr') { -%>
+  tree = (
+    <SWRConfig
+      value={{
+        fetcher: (url<% if (isTypeScript) { %>: string<% } %>) => apiGet(url),
+        revalidateOnFocus: false,
+      }}
+    >
+      {tree}
+    </SWRConfig>
+  );
+<% } -%>
+<% if (uiLibrary === 'mui') { -%>
+  tree = (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {tree}
+    </ThemeProvider>
+  );
+<% } -%>
+<% if (uiLibrary === 'chakra') { -%>
+  tree = <ChakraProvider value={defaultSystem}>{tree}</ChakraProvider>;
+<% } -%>
+
+  return <ToastProvider>{tree}</ToastProvider>;
+}

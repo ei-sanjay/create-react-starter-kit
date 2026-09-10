@@ -1,0 +1,23 @@
+import path from 'node:path';
+import * as esbuild from 'esbuild';
+
+await esbuild.build({
+  entryPoints: ['src/main.<%= jsxExt %>'],
+  bundle: true,
+  outfile: 'dist/main.js',
+  format: 'esm',
+  minify: true,
+  sourcemap: true,
+  alias: {
+    '@': path.resolve('src'),
+  },
+  loader: {
+    '.<%= jsxExt %>': '<%= isTypeScript ? 'tsx' : 'jsx' %>',
+    '.css': 'css',
+  },
+  define: {
+    'process.env.NODE_ENV': '"production"',
+  },
+});
+
+console.log('Built dist/main.js');

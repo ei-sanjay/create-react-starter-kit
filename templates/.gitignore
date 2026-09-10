@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+build/
+.cache/
+.parcel-cache/
+.rspack-profile-*/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs / coverage
+*.log
+coverage/
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Storybook
+storybook-static/
+
+# Misc
+*.tsbuildinfo
+.turbo/

@@ -1,0 +1,23 @@
+# Styling & UI example
+
+**Styling:** <%= stackLabels.styling %>
+**UI library:** <%= stackLabels.uiLibrary %>
+
+## When to use
+
+Establish design tokens early; use a component library for complex accessible primitives.
+
+## Best practice
+
+<% if (uiLibrary === 'shadcn') { -%>
+Treat shadcn-style primitives as owned source — customize freely, keep `cn()` helpers consistent.
+<% } else if (uiLibrary === 'none') { -%>
+Invest in a small set of shared primitives (`UiButton`, layout) before adding a full kit.
+<% } else { -%>
+Wrap third-party components in thin adapters (`UiButton`) so swapping kits later is cheaper.
+<% } -%>
+
+## Snippet
+
+Global styles: `src/styles/global.<%= styling === 'sass' && uiLibrary !== 'shadcn' ? 'scss' : 'css' %>`
+Button adapter: `src/components/ui/UiButton.<%= jsxExt %>`

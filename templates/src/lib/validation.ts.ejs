@@ -1,0 +1,81 @@
+<% if (validation === 'zod') { -%>
+import { z } from 'zod';
+
+export const feedbackSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Enter a valid email'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+
+<% if (isTypeScript) { -%>
+export type FeedbackValues = z.infer<typeof feedbackSchema>;
+<% } -%>
+<% } else if (validation === 'yup') { -%>
+import * as yup from 'yup';
+
+export const feedbackSchema = yup.object({
+  name: yup.string().min(2, 'Name must be at least 2 characters').required(),
+  email: yup.string().email('Enter a valid email').required(),
+  message: yup.string().min(10, 'Message must be at least 10 characters').required(),
+});
+
+<% if (isTypeScript) { -%>
+export type FeedbackValues = yup.InferType<typeof feedbackSchema>;
+<% } -%>
+<% } else if (validation === 'valibot') { -%>
+import * as v from 'valibot';
+
+export const feedbackSchema = v.object({
+  name: v.pipe(v.string(), v.minLength(2, 'Name must be at least 2 characters')),
+  email: v.pipe(v.string(), v.email('Enter a valid email')),
+  message: v.pipe(v.string(), v.minLength(10, 'Message must be at least 10 characters')),
+});
+
+<% if (isTypeScript) { -%>
+export type FeedbackValues = v.InferOutput<typeof feedbackSchema>;
+<% } -%>
+<% } else if (validation === 'joi') { -%>
+import Joi from 'joi';
+
+export const feedbackSchema = Joi.object({
+  name: Joi.string().min(2).required().messages({
+    'string.min': 'Name must be at least 2 characters',
+  }),
+  email: Joi.string().email({ tlds: false }).required().messages({
+    'string.email': 'Enter a valid email',
+  }),
+  message: Joi.string().min(10).required().messages({
+    'string.min': 'Message must be at least 10 characters',
+  }),
+});
+
+<% if (isTypeScript) { -%>
+export interface FeedbackValues {
+  name: string;
+  email: string;
+  message: string;
+}
+<% } -%>
+<% } else { -%>
+<% if (isTypeScript) { -%>
+export interface FeedbackValues {
+  name: string;
+  email: string;
+  message: string;
+}
+<% } -%>
+
+export function validateFeedback(values<% if (isTypeScript) { %>: FeedbackValues<% } %>) {
+  const errors<% if (isTypeScript) { %>: Partial<Record<keyof FeedbackValues, string>><% } %> = {};
+  if (!values.name || values.name.length < 2) {
+    errors.name = 'Name must be at least 2 characters';
+  }
+  if (!values.email || !values.email.includes('@')) {
+    errors.email = 'Enter a valid email';
+  }
+  if (!values.message || values.message.length < 10) {
+    errors.message = 'Message must be at least 10 characters';
+  }
+  return errors;
+}
+<% } -%>

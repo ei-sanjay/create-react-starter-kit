@@ -1,0 +1,13 @@
+import { render, screen } from '@testing-library/react';
+import { AppProviders } from '@/app/providers';
+import { HomePage } from '@/routes/HomePage';
+
+test('renders the project hero', () => {
+  render(
+    <AppProviders>
+      <HomePage />
+    </AppProviders>,
+  );
+
+  expect(screen.getByRole('heading', { name: /<%= projectName %>/i })).toBeInTheDocument();
+});

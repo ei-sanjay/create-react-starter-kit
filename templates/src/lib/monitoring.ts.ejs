@@ -1,0 +1,66 @@
+<% if (errorTracking === 'sentry') { -%>
+import * as Sentry from '@sentry/react';
+
+export function initMonitoring() {
+  const dsn = import.meta.env?.VITE_SENTRY_DSN;
+  if (!dsn) {
+    return;
+  }
+
+  Sentry.init({
+    dsn,
+    tracesSampleRate: 0.1,
+    environment: import.meta.env?.MODE ?? 'development',
+  });
+}
+<% } else if (errorTracking === 'bugsnag') { -%>
+import Bugsnag from '@bugsnag/js';
+import BugsnagPluginReact from '@bugsnag/plugin-react';
+
+export function initMonitoring() {
+  const apiKey = import.meta.env?.VITE_BUGSNAG_API_KEY;
+  if (!apiKey) {
+    return;
+  }
+
+  Bugsnag.start({
+    apiKey,
+    plugins: [new BugsnagPluginReact()],
+  });
+}
+<% } else if (errorTracking === 'logrocket') { -%>
+import LogRocket from 'logrocket';
+
+export function initMonitoring() {
+  const appId = import.meta.env?.VITE_LOGROCKET_APP_ID;
+  if (!appId) {
+    return;
+  }
+
+  LogRocket.init(appId);
+}
+<% } else if (errorTracking === 'datadog') { -%>
+import { datadogRum } from '@datadog/browser-rum';
+
+export function initMonitoring() {
+  const applicationId = import.meta.env?.VITE_DATADOG_APPLICATION_ID;
+  const clientToken = import.meta.env?.VITE_DATADOG_CLIENT_TOKEN;
+  if (!applicationId || !clientToken) {
+    return;
+  }
+
+  datadogRum.init({
+    applicationId,
+    clientToken,
+    site: import.meta.env?.VITE_DATADOG_SITE ?? 'datadoghq.com',
+    service: '<%= projectName %>',
+    sessionSampleRate: 100,
+    trackResources: true,
+    trackLongTasks: true,
+  });
+}
+<% } else { -%>
+export function initMonitoring() {
+  // Error tracking disabled for this scaffold.
+}
+<% } -%>

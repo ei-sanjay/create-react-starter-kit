@@ -1,0 +1,11 @@
+/** @type { import('@storybook/<%= buildTool === 'vite' || buildTool === 'esbuild' ? 'react-vite' : 'react-webpack5' %>').StorybookConfig } */
+const config = {
+  stories: ['../src/**/*.stories.@(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)'],
+  addons: [],
+  framework: {
+    name: '@storybook/<%= buildTool === 'vite' || buildTool === 'esbuild' ? 'react-vite' : 'react-webpack5' %>',
+    options: {},
+  },
+};
+
+export default config;

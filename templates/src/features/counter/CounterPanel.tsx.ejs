@@ -1,0 +1,66 @@
+<% if (stateManagement === 'redux') { -%>
+import { useDispatch, useSelector } from 'react-redux';
+import { decrement, increment } from '@/store';
+<% if (isTypeScript) { -%>
+import type { RootState } from '@/store';
+<% } -%>
+<% } else if (stateManagement === 'zustand') { -%>
+import { useCounterStore } from '@/store';
+<% } else if (stateManagement === 'jotai') { -%>
+import { useAtom } from 'jotai';
+import { counterAtom } from '@/store';
+<% } else if (stateManagement === 'context') { -%>
+import { useAppState } from '@/store/context';
+<% } -%>
+import { UiButton } from '@/components/ui/UiButton';
+import { useToast } from '@/components/ui/Toast';
+
+export function CounterPanel() {
+  const { push } = useToast();
+<% if (stateManagement === 'redux') { -%>
+  const value = useSelector((state<% if (isTypeScript) { %>: RootState<% } %>) => state.counter.value);
+  const dispatch = useDispatch();
+  const onInc = () => dispatch(increment());
+  const onDec = () => dispatch(decrement());
+<% } else if (stateManagement === 'zustand') { -%>
+  const value = useCounterStore((s) => s.value);
+  const onInc = useCounterStore((s) => s.increment);
+  const onDec = useCounterStore((s) => s.decrement);
+<% } else if (stateManagement === 'jotai') { -%>
+  const [value, setValue] = useAtom(counterAtom);
+  const onInc = () => setValue((v) => v + 1);
+  const onDec = () => setValue((v) => v - 1);
+<% } else if (stateManagement === 'context') { -%>
+  const { state, dispatch } = useAppState();
+  const value = state.value;
+  const onInc = () => dispatch({ type: 'increment' });
+  const onDec = () => dispatch({ type: 'decrement' });
+<% } else { -%>
+  const value = 0;
+  const onInc = () => undefined;
+  const onDec = () => undefined;
+<% } -%>
+
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Client state</h2>
+        <p><%= stackLabels.stateManagement %> example — local interactive counter.</p>
+      </header>
+<% if (stateManagement === 'none') { -%>
+      <p className="muted">Client state library was set to None. Add one later under <code>src/store</code>.</p>
+<% } else { -%>
+      <div className="counter">
+        <UiButton onClick={() => { onDec(); push('Decremented', 'info'); }}>−</UiButton>
+        <strong className="counter-value" aria-live="polite">{value}</strong>
+        <UiButton onClick={() => { onInc(); push('Incremented', 'success'); }}>+</UiButton>
+      </div>
+<% } -%>
+      <p className="panel-note">
+        <strong>When to use:</strong> shared UI state that is not server cache.
+        <br />
+        <strong>Best practice:</strong> keep slices/stores small and colocated with features.
+      </p>
+    </article>
+  );
+}

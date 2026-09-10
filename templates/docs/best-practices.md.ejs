@@ -1,0 +1,56 @@
+# Best practices
+
+## Code organization
+
+- Colocate tests next to units or under `tests/` for cross-cutting suites.
+- Prefer small modules with clear exports over “utils dump” files.
+- Name features after domains (`billing`, `auth`), not technical junk drawers.
+
+## Linting & formatting
+
+- Tooling: **<%= stackLabels.linting %>** + **<%= stackLabels.formatting %>**
+- Run lint before push; treat warnings as debt with a burn-down plan.
+- Husky + lint-staged formats staged files so diffs stay clean.
+- commitlint enforces Conventional Commits on `git commit`.
+
+## Environment variables
+
+- Never commit `.env`.
+- Prefix client-visible vars for your bundler.
+- Validate required env at boot for production deploys.
+
+## Testing strategy
+
+<% if (unitTesting === 'vitest' || unitTesting === 'jest') { -%>
+- Unit/integration with **<%= stackLabels.unitTesting %>** + Testing Library for components.
+<% } else if (unitTesting === 'rtl') { -%>
+- React Testing Library is installed — pair it with a runner of your choice.
+<% } else { -%>
+- Unit testing was skipped; add a runner before your first production release.
+<% } -%>
+<% if (e2eTesting !== 'none') { -%>
+- E2E with **<%= stackLabels.e2eTesting %>** for critical user journeys (load home, submit form).
+<% } -%>
+<% if (visualTesting === 'storybook') { -%>
+- Storybook for isolated UI development and visual review.
+<% } else if (visualTesting === 'chromatic') { -%>
+- Chromatic for visual regression against baselines.
+<% } -%>
+
+Aim for: fast unit tests on logic, fewer integration tests on features, thin e2e on happy paths.
+
+## Deployment notes
+
+1. `<%= packageManager === 'npm' ? 'npm run' : packageManager %> build`
+2. Serve `dist/` (or your bundler's output) behind HTTPS.
+3. Configure SPA fallback to `index.html` for client routes.
+4. Inject production env vars in the host (Vercel, Netlify, Cloudflare, nginx, etc.).
+5. Enable error tracking DSN in production only.
+
+## Production checklist
+
+- [ ] Env vars documented and set
+- [ ] Lint + tests in CI
+- [ ] Bundle analyzed for accidental secrets
+- [ ] Monitoring verified with a test event
+- [ ] Accessibility pass on primary flows

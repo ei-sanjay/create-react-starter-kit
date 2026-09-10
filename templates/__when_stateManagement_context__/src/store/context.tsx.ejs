@@ -1,0 +1,57 @@
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useReducer,
+<% if (isTypeScript) { -%>
+  type ReactNode,
+  type Dispatch,
+<% } -%>
+} from 'react';
+
+<% if (isTypeScript) { -%>
+interface State {
+  value: number;
+}
+
+type Action =
+  | { type: 'increment' }
+  | { type: 'decrement' }
+  | { type: 'set'; payload: number };
+
+interface AppStateContextValue {
+  state: State;
+  dispatch: Dispatch<Action>;
+}
+<% } -%>
+
+const initialState<% if (isTypeScript) { %>: State<% } %> = { value: 0 };
+
+function reducer(state<% if (isTypeScript) { %>: State<% } %>, action<% if (isTypeScript) { %>: Action<% } %>)<% if (isTypeScript) { %>: State<% } %> {
+  switch (action.type) {
+    case 'increment':
+      return { value: state.value + 1 };
+    case 'decrement':
+      return { value: state.value - 1 };
+    case 'set':
+      return { value: action.payload };
+    default:
+      return state;
+  }
+}
+
+const AppStateContext = createContext<% if (isTypeScript) { %><AppStateContextValue | null><% } %>(null);
+
+export function AppStateProvider({ children }<% if (isTypeScript) { %>: { children: ReactNode }<% } %>) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const value = useMemo(() => ({ state, dispatch }), [state]);
+  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+}
+
+export function useAppState() {
+  const ctx = useContext(AppStateContext);
+  if (!ctx) {
+    throw new Error('useAppState must be used within AppStateProvider');
+  }
+  return ctx;
+}

@@ -1,0 +1,373 @@
+<% if (forms === 'react-hook-form') { -%>
+import { useForm } from 'react-hook-form';
+<% if (validation === 'zod') { -%>
+import { zodResolver } from '@hookform/resolvers/zod';
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else if (isTypeScript) { -%>
+import type { FeedbackValues } from '@/lib/validation';
+<% } -%>
+<% } else if (forms === 'formik') { -%>
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+<% if (validation === 'yup') { -%>
+import { feedbackSchema } from '@/lib/validation';
+<% } else if (validation === 'zod') { -%>
+import { feedbackSchema } from '@/lib/validation';
+<% } -%>
+<% if (isTypeScript) { -%>
+import type { FeedbackValues } from '@/lib/validation';
+<% } -%>
+<% } else if (forms === 'tanstack-form') { -%>
+import { useForm } from '@tanstack/react-form';
+<% if (validation !== 'none') { -%>
+import { feedbackSchema } from '@/lib/validation';
+<% } -%>
+<% if (isTypeScript) { -%>
+import type { FeedbackValues } from '@/lib/validation';
+<% } -%>
+<% } else { -%>
+import { useState } from 'react';
+<% if (validation === 'none') { -%>
+import { validateFeedback<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else { -%>
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } -%>
+<% } -%>
+import { createFeedback } from '@/services/api';
+import { useToast } from '@/components/ui/Toast';
+import { UiButton } from '@/components/ui/UiButton';
+
+const defaults<% if (isTypeScript) { %>: FeedbackValues<% } %> = {
+  name: '',
+  email: '',
+  message: '',
+};
+
+export function FeedbackForm() {
+  const { push } = useToast();
+
+<% if (forms === 'react-hook-form') { -%>
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<% if (isTypeScript) { %><FeedbackValues><% } %>({
+    defaultValues: defaults,
+<% if (validation === 'zod') { -%>
+    resolver: zodResolver(feedbackSchema),
+<% } -%>
+  });
+
+  const onSubmit = async (values<% if (isTypeScript) { %>: FeedbackValues<% } %>) => {
+<% if (validation === 'yup') { -%>
+    await feedbackSchema.validate(values, { abortEarly: false });
+<% } else if (validation === 'valibot') { -%>
+    const { parse } = await import('valibot');
+    parse(feedbackSchema, values);
+<% } else if (validation === 'joi') { -%>
+    const result = feedbackSchema.validate(values, { abortEarly: false });
+    if (result.error) {
+      throw result.error;
+    }
+<% } -%>
+    await createFeedback(values);
+    push('Feedback submitted (demo API)', 'success');
+    reset();
+  };
+
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Forms & validation</h2>
+        <p>
+          <%= stackLabels.forms %>
+<% if (validation !== 'none') { -%>
+          {' '}
+          + <%= stackLabels.validation %>
+<% } -%>
+        </p>
+      </header>
+      <form className="feedback-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <label>
+          Name
+          <input {...register('name')} placeholder="Ada Lovelace" />
+          {errors.name && <span className="field-error">{errors.name.message}</span>}
+        </label>
+        <label>
+          Email
+          <input type="email" {...register('email')} placeholder="ada@example.com" />
+          {errors.email && <span className="field-error">{errors.email.message}</span>}
+        </label>
+        <label>
+          Message
+          <textarea rows={4} {...register('message')} placeholder="What should we improve?" />
+          {errors.message && <span className="field-error">{errors.message.message}</span>}
+        </label>
+        <UiButton type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Sending…' : 'Send feedback'}
+        </UiButton>
+      </form>
+      <p className="panel-note">
+        <strong>When to use:</strong> complex forms with validation and async submit.
+        <br />
+        <strong>Best practice:</strong> keep schemas in <code>src/lib</code> and reuse across client/server.
+      </p>
+    </article>
+  );
+<% } else if (forms === 'formik') { -%>
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Forms & validation</h2>
+        <p>
+          <%= stackLabels.forms %>
+<% if (validation !== 'none') { -%>
+          {' '}
+          + <%= stackLabels.validation %>
+<% } -%>
+        </p>
+      </header>
+      <Formik
+        initialValues={defaults}
+<% if (validation === 'yup') { -%>
+        validationSchema={feedbackSchema}
+<% } -%>
+        onSubmit={async (values, helpers) => {
+<% if (validation === 'zod') { -%>
+          feedbackSchema.parse(values);
+<% } -%>
+          await createFeedback(values);
+          push('Feedback submitted (demo API)', 'success');
+          helpers.resetForm();
+        }}
+      >
+        {({ isSubmitting }) => (
+          <Form className="feedback-form" noValidate>
+            <label>
+              Name
+              <Field name="name" placeholder="Ada Lovelace" />
+              <ErrorMessage name="name" component="span" className="field-error" />
+            </label>
+            <label>
+              Email
+              <Field name="email" type="email" placeholder="ada@example.com" />
+              <ErrorMessage name="email" component="span" className="field-error" />
+            </label>
+            <label>
+              Message
+              <Field as="textarea" rows={4} name="message" placeholder="What should we improve?" />
+              <ErrorMessage name="message" component="span" className="field-error" />
+            </label>
+            <UiButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Sending…' : 'Send feedback'}
+            </UiButton>
+          </Form>
+        )}
+      </Formik>
+      <p className="panel-note">
+        <strong>When to use:</strong> form-heavy screens with Formik's render/props model.
+        <br />
+        <strong>Best practice:</strong> prefer Yup/Zod schemas over ad-hoc validators.
+      </p>
+    </article>
+  );
+<% } else if (forms === 'tanstack-form') { -%>
+  const form = useForm({
+    defaultValues: defaults,
+    onSubmit: async ({ value }) => {
+<% if (validation === 'zod') { -%>
+      feedbackSchema.parse(value);
+<% } else if (validation === 'yup') { -%>
+      await feedbackSchema.validate(value);
+<% } else if (validation === 'valibot') { -%>
+      const { parse } = await import('valibot');
+      parse(feedbackSchema, value);
+<% } else if (validation === 'joi') { -%>
+      const result = feedbackSchema.validate(value);
+      if (result.error) throw result.error;
+<% } -%>
+      await createFeedback(value);
+      push('Feedback submitted (demo API)', 'success');
+      form.reset();
+    },
+  });
+
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Forms & validation</h2>
+        <p>
+          <%= stackLabels.forms %>
+<% if (validation !== 'none') { -%>
+          {' '}
+          + <%= stackLabels.validation %>
+<% } -%>
+        </p>
+      </header>
+      <form
+        className="feedback-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <form.Field name="name">
+          {(field) => (
+            <label>
+              Name
+              <input
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Ada Lovelace"
+              />
+            </label>
+          )}
+        </form.Field>
+        <form.Field name="email">
+          {(field) => (
+            <label>
+              Email
+              <input
+                type="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="ada@example.com"
+              />
+            </label>
+          )}
+        </form.Field>
+        <form.Field name="message">
+          {(field) => (
+            <label>
+              Message
+              <textarea
+                rows={4}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="What should we improve?"
+              />
+            </label>
+          )}
+        </form.Field>
+        <UiButton type="submit">Send feedback</UiButton>
+      </form>
+      <p className="panel-note">
+        <strong>When to use:</strong> headless, type-safe forms with fine-grained reactivity.
+        <br />
+        <strong>Best practice:</strong> validate at field and form boundaries with a shared schema.
+      </p>
+    </article>
+  );
+<% } else { -%>
+  const [values, setValues] = useState<% if (isTypeScript) { %><FeedbackValues><% } %>(defaults);
+  const [errors, setErrors] = useState<% if (isTypeScript) { %><Partial<Record<keyof FeedbackValues, string>>><% } %>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onSubmit = async (event<% if (isTypeScript) { %>: React.FormEvent<% } %>) => {
+    event.preventDefault();
+<% if (validation === 'none') { -%>
+    const nextErrors = validateFeedback(values);
+<% } else if (validation === 'zod') { -%>
+    const parsed = feedbackSchema.safeParse(values);
+    const nextErrors = parsed.success
+      ? {}
+      : Object.fromEntries(
+          parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message]),
+        );
+<% } else if (validation === 'yup') { -%>
+    let nextErrors<% if (isTypeScript) { %>: Partial<Record<keyof FeedbackValues, string>><% } %> = {};
+    try {
+      await feedbackSchema.validate(values, { abortEarly: false });
+    } catch (err) {
+      if (err && typeof err === 'object' && 'inner' in err) {
+        nextErrors = Object.fromEntries(
+          (err<% if (isTypeScript) { %> as { inner: Array<{ path?: string; message: string }> }<% } %>).inner
+            .filter((e) => e.path)
+            .map((e) => [e.path, e.message]),
+        );
+      }
+    }
+<% } else if (validation === 'joi') { -%>
+    const result = feedbackSchema.validate(values, { abortEarly: false });
+    const nextErrors = result.error
+      ? Object.fromEntries(
+          result.error.details.map((d<% if (isTypeScript) { %>: { path: (string | number)[]; message: string }<% } %>) => [
+            String(d.path[0]),
+            d.message,
+          ]),
+        )
+      : {};
+<% } else { -%>
+    let nextErrors<% if (isTypeScript) { %>: Partial<Record<keyof FeedbackValues, string>><% } %> = {};
+    try {
+      const { parse } = await import('valibot');
+      parse(feedbackSchema, values);
+    } catch (err) {
+      nextErrors = { message: err instanceof Error ? err.message : 'Invalid form' };
+    }
+<% } -%>
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
+    setIsSubmitting(true);
+    try {
+      await createFeedback(values);
+      push('Feedback submitted (demo API)', 'success');
+      setValues(defaults);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Forms & validation</h2>
+        <p>Native form controls<% if (validation !== 'none') { %> + <%= stackLabels.validation %><% } %></p>
+      </header>
+      <form className="feedback-form" onSubmit={onSubmit} noValidate>
+        <label>
+          Name
+          <input
+            value={values.name}
+            onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
+            placeholder="Ada Lovelace"
+          />
+          {errors.name && <span className="field-error">{errors.name}</span>}
+        </label>
+        <label>
+          Email
+          <input
+            type="email"
+            value={values.email}
+            onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
+            placeholder="ada@example.com"
+          />
+          {errors.email && <span className="field-error">{errors.email}</span>}
+        </label>
+        <label>
+          Message
+          <textarea
+            rows={4}
+            value={values.message}
+            onChange={(e) => setValues((v) => ({ ...v, message: e.target.value }))}
+            placeholder="What should we improve?"
+          />
+          {errors.message && <span className="field-error">{errors.message}</span>}
+        </label>
+        <UiButton type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Sending…' : 'Send feedback'}
+        </UiButton>
+      </form>
+      <p className="panel-note">
+        <strong>When to use:</strong> simple forms without a dedicated form library.
+        <br />
+        <strong>Best practice:</strong> graduate to a form library once fields or validation grow.
+      </p>
+    </article>
+  );
+<% } -%>
+}

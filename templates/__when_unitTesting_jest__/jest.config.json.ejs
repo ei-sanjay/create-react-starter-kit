@@ -1,0 +1,11 @@
+{
+<% if (isTypeScript) { -%>
+  "preset": "ts-jest",
+<% } -%>
+  "testEnvironment": "jsdom",
+  "setupFilesAfterEnv": ["<rootDir>/tests/setup.<%= ext %>"],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "\\\\.(css|scss)$": "<rootDir>/tests/styleMock.<%= ext %>"
+  }
+}

@@ -1,0 +1,55 @@
+# Selected stack
+
+This document explains each choice made when generating **<%= projectName %>**.
+
+## Build — <%= stackLabels.buildTool %>
+
+Fast local feedback and a production bundle. Prefer keeping config minimal; add plugins only when needed.
+
+**Best practice:** lock Node and package manager versions in CI for reproducible builds.
+
+## Language — <%= stackLabels.language %>
+
+<% if (isTypeScript) { -%>
+TypeScript catches contract mistakes early. Keep `strict` on; avoid `any` except at true boundaries.
+<% } else { -%>
+JavaScript keeps the barrier low. Consider migrating hot modules to TypeScript as the app grows.
+<% } -%>
+
+## Routing — <%= stackLabels.router %>
+
+Client-side navigation with nested layouts. Keep route modules thin; push data loading into features.
+
+## Client state — <%= stackLabels.stateManagement %>
+
+Use for UI state (modals, wizards, ephemeral counters). Do **not** mirror server entities here if you have a server-state library.
+
+## Server state — <%= stackLabels.serverState %>
+
+Caches remote data, handles loading/error, and deduplicates requests. Example: posts panel on the home page.
+
+## Forms — <%= stackLabels.forms %> / Validation — <%= stackLabels.validation %>
+
+Schemas define the contract; the form library binds inputs. Share schemas with API payloads when possible.
+
+## Styling — <%= stackLabels.styling %> / UI — <%= stackLabels.uiLibrary %>
+
+Tokens and primitives establish visual consistency. Prefer composition over one-off CSS.
+
+## API — <%= stackLabels.apiLayer %>
+
+Centralize base URL, headers, and error logging in `src/services/api.<%= ext %>`.
+
+## Quality gates
+
+| Area | Choice |
+|------|--------|
+| Unit | <%= stackLabels.unitTesting %> |
+| E2E | <%= stackLabels.e2eTesting %> |
+| Visual | <%= stackLabels.visualTesting %> |
+| Lint | <%= stackLabels.linting %> |
+| Format | <%= stackLabels.formatting %> |
+| Git hooks | Husky + lint-staged + commitlint |
+| Structure | Feature-based + `@/` aliases |
+
+See `docs/examples/` for focused usage notes.

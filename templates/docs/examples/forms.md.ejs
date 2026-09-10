@@ -1,0 +1,18 @@
+# Forms & validation example
+
+**Forms:** <%= stackLabels.forms %>
+**Validation:** <%= stackLabels.validation %>
+
+**Live demo:** Feedback form on `/`
+
+## When to use
+
+Multi-field input with client-side rules and async submit.
+
+## Best practice
+
+Define schemas once in `src/lib/validation.<%= ext %>` and reuse across UI and API boundaries.
+
+## Snippet
+
+See `src/features/feedback/FeedbackForm.<%= jsxExt %>`.

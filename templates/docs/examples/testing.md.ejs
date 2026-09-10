@@ -1,0 +1,27 @@
+# Testing example
+
+| Layer | Choice |
+|-------|--------|
+| Unit | <%= stackLabels.unitTesting %> |
+| E2E | <%= stackLabels.e2eTesting %> |
+| Visual | <%= stackLabels.visualTesting %> |
+
+## When to use
+
+- Unit: pure logic + component behavior
+- E2E: critical journeys across routes
+- Visual: regressions in UI appearance
+
+## Best practice
+
+Keep e2e thin. Prefer Testing Library queries that reflect how users find elements (`getByRole`, labels).
+
+## Locations
+
+- Setup: `tests/setup.<%= ext %>` (when applicable)
+- Component smoke: `tests/App.test.<%= jsxExt %>`
+<% if (e2eTesting === 'playwright') { -%>
+- E2E: `tests/e2e/home.spec.<%= ext %>`
+<% } else if (e2eTesting === 'cypress') { -%>
+- E2E: `cypress/e2e/home.cy.<%= ext %>`
+<% } -%>

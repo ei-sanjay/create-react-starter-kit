@@ -1,0 +1,91 @@
+<% if (serverState === 'tanstack-query') { -%>
+import { useQuery } from '@tanstack/react-query';
+import { fetchPosts } from '@/services/api';
+<% } else if (serverState === 'swr') { -%>
+import useSWR from 'swr';
+<% } else if (serverState === 'rtk-query') { -%>
+import { useGetPostsQuery } from '@/store/postsApi';
+<% } else { -%>
+import { useEffect, useState } from 'react';
+import { fetchPosts } from '@/services/api';
+<% } -%>
+
+export function PostsPanel() {
+<% if (serverState === 'tanstack-query') { -%>
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: ['posts'],
+    queryFn: fetchPosts,
+  });
+<% } else if (serverState === 'swr') { -%>
+  const { data, error, isLoading, isValidating, mutate } = useSWR('/posts?_limit=5');
+  const isFetching = isValidating;
+  const refetch = () => mutate();
+<% } else if (serverState === 'rtk-query') { -%>
+  const { data, isLoading, error, refetch, isFetching } = useGetPostsQuery();
+<% } else { -%>
+  const [data, setData] = useState<% if (isTypeScript) { %><Awaited<ReturnType<typeof fetchPosts>> | null><% } %>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<% if (isTypeScript) { %><Error | null><% } %>(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const load = async () => {
+    setIsFetching(true);
+    setError(null);
+    try {
+      const posts = await fetchPosts();
+      setData(posts);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load'));
+    } finally {
+      setIsLoading(false);
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const refetch = () => void load();
+<% } -%>
+
+  return (
+    <article className="panel">
+      <header className="panel-header">
+        <h2>Server state</h2>
+        <p>
+          <%= stackLabels.serverState === 'None' ? 'Manual fetch via ' + stackLabels.apiLayer : stackLabels.serverState %>{' '}
+          · JSONPlaceholder posts
+        </p>
+      </header>
+
+      <div className="panel-toolbar">
+        <button type="button" className="ui-button" onClick={() => void refetch()} disabled={isFetching}>
+          {isFetching ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+
+      {isLoading && <p className="muted">Loading posts…</p>}
+      {error && (
+        <p className="error-text">
+          {error instanceof Error ? error.message : 'Request failed'}
+        </p>
+      )}
+      {data && (
+        <ul className="post-list">
+          {data.map((post<% if (isTypeScript) { %>: { id: number; title: string }<% } %>) => (
+            <li key={post.id}>
+              <strong>#{post.id}</strong> {post.title}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="panel-note">
+        <strong>When to use:</strong> remote data with caching, retries, and refetch rules.
+        <br />
+        <strong>Best practice:</strong> treat server cache separately from UI/client state.
+      </p>
+    </article>
+  );
+}

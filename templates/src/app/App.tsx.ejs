@@ -1,0 +1,71 @@
+<% if (router === 'react-router') { -%>
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { HomePage } from '@/routes/HomePage';
+import { AboutPage } from '@/routes/AboutPage';
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+<% } else { -%>
+import {
+  Outlet,
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from '@tanstack/react-router';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { HomePage } from '@/routes/HomePage';
+import { AboutPage } from '@/routes/AboutPage';
+
+function RootComponent() {
+  return (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  );
+}
+
+const rootRoute = createRootRoute({
+  component: RootComponent,
+});
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomePage,
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute]);
+
+const router = createRouter({ routeTree });
+
+<% if (isTypeScript) { -%>
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+<% } -%>
+
+export function App() {
+  return <RouterProvider router={router} />;
+}
+<% } -%>

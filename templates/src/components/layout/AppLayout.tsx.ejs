@@ -1,0 +1,64 @@
+<% if (isTypeScript) { -%>
+import type { ReactNode } from 'react';
+<% } -%>
+<% if (router === 'react-router') { -%>
+import { NavLink, Outlet } from 'react-router-dom';
+<% } else { -%>
+import { Link, useRouterState } from '@tanstack/react-router';
+<% } -%>
+
+<% if (isTypeScript && router === 'tanstack-router') { -%>
+interface AppLayoutProps {
+  children?: ReactNode;
+}
+<% } -%>
+
+export function AppLayout(<% if (router === 'tanstack-router') { %>{ children }<% if (isTypeScript) { %>: AppLayoutProps<% } %><% } %>) {
+<% if (router === 'tanstack-router') { -%>
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+<% } -%>
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          <div>
+            <p className="brand-name"><%= projectName %></p>
+            <p className="brand-tagline">Production React starter</p>
+          </div>
+        </div>
+        <nav className="app-nav" aria-label="Primary">
+<% if (router === 'react-router') { -%>
+          <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+            Home
+          </NavLink>
+          <NavLink to="/about" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+            About
+          </NavLink>
+<% } else { -%>
+          <Link to="/" className={pathname === '/' ? 'nav-link active' : 'nav-link'}>
+            Home
+          </Link>
+          <Link to="/about" className={pathname === '/about' ? 'nav-link active' : 'nav-link'}>
+            About
+          </Link>
+<% } -%>
+        </nav>
+      </header>
+      <main className="app-main">
+<% if (router === 'react-router') { -%>
+        <Outlet />
+<% } else { -%>
+        {children}
+<% } -%>
+      </main>
+      <footer className="app-footer">
+        <p>
+          Scaffolded with create-react-starter-kit · <%= stackLabels.buildTool %> ·{' '}
+          <%= stackLabels.language %>
+        </p>
+      </footer>
+    </div>
+  );
+}

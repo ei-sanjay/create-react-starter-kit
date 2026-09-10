@@ -1,0 +1,33 @@
+import path from 'node:path';
+import alias from '@rollup/plugin-alias';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import replace from '@rollup/plugin-replace';
+<% if (isTypeScript) { -%>
+import typescript from '@rollup/plugin-typescript';
+<% } -%>
+import postcss from 'rollup-plugin-postcss';
+
+export default {
+  input: 'src/main.<%= jsxExt %>',
+  output: {
+    file: 'dist/main.js',
+    format: 'esm',
+    sourcemap: true,
+  },
+  plugins: [
+    alias({
+      entries: [{ find: '@', replacement: path.resolve('src') }],
+    }),
+    replace({
+      preventAssignment: true,
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    }),
+    resolve({ browser: true, extensions: ['.<%= jsxExt %>', '.<%= ext %>', '.js', '.jsx'] }),
+    commonjs(),
+<% if (isTypeScript) { -%>
+    typescript({ tsconfig: './tsconfig.json' }),
+<% } -%>
+    postcss({ extract: true }),
+  ],
+};

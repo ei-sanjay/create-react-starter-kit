@@ -1,0 +1,7 @@
+<% if (isTypeScript) { -%>
+/** Shared domain types used across features. */
+export type { Post } from '@/services/api';
+<% } else { -%>
+// Shared types live here when you migrate hot paths to TypeScript.
+export {};
+<% } -%>
