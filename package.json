@@ -1,6 +1,6 @@
 {
   "name": "create-react-starter-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive CLI to scaffold a production-ready React app with your preferred stack",
   "keywords": [
     "react",
@@ -13,7 +13,7 @@
     "typescript",
     "generator"
   ],
-  "author": "",
+  "author": "ei-sanjay",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -53,10 +53,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/example/create-react-starter-kit.git"
+    "url": "git+https://github.com/ei-sanjay/create-react-starter-kit.git"
   },
   "bugs": {
-    "url": "https://github.com/example/create-react-starter-kit/issues"
+    "url": "https://github.com/ei-sanjay/create-react-starter-kit/issues"
   },
-  "homepage": "https://github.com/example/create-react-starter-kit#readme"
+  "homepage": "https://github.com/ei-sanjay/create-react-starter-kit#readme"
 }
