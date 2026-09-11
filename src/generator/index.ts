@@ -334,13 +334,30 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
   }
 
   pkg['lint-staged'] = {
-    [`*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'},css,md,json}`]:
+    [`src/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'},css,scss,md,json}`]:
       answers.formatting === 'prettier'
         ? ['prettier --write']
         : answers.linting === 'biome'
           ? ['biome check --write']
           : ['eslint --fix'],
+    [`tests/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'}}`]:
+      answers.formatting === 'prettier'
+        ? ['prettier --write']
+        : answers.linting === 'biome'
+          ? ['biome check --write']
+          : ['eslint --fix'],
+    'docs/**/*.md':
+      answers.formatting === 'prettier' ? ['prettier --write'] : [],
+    '*.{json,md}':
+      answers.formatting === 'prettier' ? ['prettier --write'] : [],
   };
+
+  // Drop empty lint-staged entries
+  pkg['lint-staged'] = Object.fromEntries(
+    Object.entries(pkg['lint-staged'] as Record<string, string[]>).filter(
+      ([, cmds]) => cmds.length > 0,
+    ),
+  );
 
   await fs.writeJson(path.join(answers.targetDir, 'package.json'), pkg, {
     spaces: 2,
@@ -348,7 +365,6 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
 
   // Scalable feature-based layout used across large production React apps
   const dirs = [
-    'src/app',
     'src/assets',
     'src/components/layout',
     'src/components/ui',

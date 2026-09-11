@@ -1,29 +1,45 @@
-import { CounterPanel } from '@/features/counter/CounterPanel';
-import { PostsPanel } from '@/features/posts/PostsPanel';
-import { FeedbackForm } from '@/features/feedback/FeedbackForm';
+<% if (router === 'react-router') { -%>
+import { Link } from 'react-router-dom';
+<% } else { -%>
+import { Link } from '@tanstack/react-router';
+<% } -%>
 import { StackBadge } from '@/components/StackBadge';
-import { useToast } from '@/components/ui/Toast';
-import { UiButton } from '@/components/ui/UiButton';
+
+const demos = [
+  {
+    to: '/counter',
+    title: 'Counter',
+    body: 'Client state demo with <%= stackLabels.stateManagement %>.',
+  },
+  {
+    to: '/posts',
+    title: 'Posts',
+    body: 'Server state / data fetching with <%= stackLabels.serverState %>.',
+  },
+  {
+    to: '/feedback',
+    title: 'Feedback',
+    body: 'Forms and validation with <%= stackLabels.forms %><% if (validation !== 'none') { %> + <%= stackLabels.validation %><% } %>.',
+  },
+] as const;
 
 export function HomePage() {
-  const { push } = useToast();
-
   return (
     <div className="page home-page">
       <section className="hero">
         <p className="eyebrow">Starter workspace</p>
         <h1><%= projectName %></h1>
         <p className="lede">
-          A minimal, production-shaped React app wired for your selected stack. Explore the panels
-          below — each one is a real usage example, not a placeholder.
+          A production-shaped React starter. Open each demo route to explore client state, server
+          data, and forms — each page is a real working example for your selected stack.
         </p>
         <div className="hero-actions">
-          <UiButton onClick={() => push('Toast system is ready', 'success')}>
-            Show toast
-          </UiButton>
-          <a className="text-link" href="/about">
-            Read about the stack →
-          </a>
+          <Link className="ui-button" to="/counter">
+            Open counter demo
+          </Link>
+          <Link className="text-link" to="/about">
+            About this starter →
+          </Link>
         </div>
         <div className="stack-row">
           <StackBadge label="Build" value="<%= stackLabels.buildTool %>" />
@@ -35,12 +51,18 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="panels">
-<% if (stateManagement !== 'none') { -%>
-        <CounterPanel />
-<% } -%>
-        <PostsPanel />
-        <FeedbackForm />
+      <section className="panels" aria-label="Demo routes">
+        {demos.map((demo) => (
+          <article key={demo.to} className="panel">
+            <header className="panel-header">
+              <h2>{demo.title}</h2>
+              <p>{demo.body}</p>
+            </header>
+            <Link className="text-link" to={demo.to}>
+              Go to {demo.title.toLowerCase()} →
+            </Link>
+          </article>
+        ))}
       </section>
     </div>
   );

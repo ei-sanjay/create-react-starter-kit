@@ -74,21 +74,23 @@ Open the URL printed in the terminal (typically `http://localhost:5173`).
 
 ```text
 src/
-  app/           # App shell, providers, bootstrap
-  assets/        # Images / media imported from code
-  components/    # Shared UI (layout/, ui/)
-  config/        # Env helpers / app config
-  features/      # Domain modules (scalable default)
-  hooks/         # Shared hooks
-  lib/           # Third-party wrappers / helpers
-  routes/        # Route-level pages
-  store/         # Client state
-  services/      # API clients
-  styles/        # Global styles
-  types/         # Shared types
-  utils/         # Pure helpers
-docs/            # Architecture & usage docs
-tests/           # Extra test helpers / e2e
+  App.tsx         # Route tree
+  main.tsx        # Bootstrap / render
+  providers.tsx   # App-wide providers
+  assets/         # Images / media imported from code
+  components/     # Shared UI (layout/, ui/)
+  config/         # Env helpers / app config
+  features/       # Domain modules (scalable default)
+  hooks/          # Shared hooks
+  lib/            # Third-party wrappers / helpers
+  routes/         # Route-level pages
+  store/          # Client state
+  services/       # API clients
+  styles/         # Global styles
+  types/          # Shared types
+  utils/          # Pure helpers
+docs/             # Architecture & usage docs
+tests/            # Unit + e2e helpers
 ```
 
 Organization: **feature-based / domain-driven** with `@/` path aliases. See `docs/architecture.md`.
@@ -123,21 +125,13 @@ Start with `docs/selected-stack.md` and `docs/getting-started.md`.
 
 ## Example usage
 
-The demo page (`/`) shows:
+The demo pages include:
 
-- navigation + layout
-<% if (stateManagement !== 'none') { -%>
-- client state (<%= stackLabels.stateManagement %>)
-<% } -%>
-<% if (serverState !== 'none') { -%>
-- data fetching (<%= stackLabels.serverState %>)
-<% } -%>
-<% if (forms !== 'none') { -%>
-- forms (<%= stackLabels.forms %>)
-<% } -%>
-<% if (validation !== 'none') { -%>
-- validation (<%= stackLabels.validation %>)
-<% } -%>
+- `/` — overview + links to demos
+- `/counter` — client state (<%= stackLabels.stateManagement %>)
+- `/posts` — data fetching (<%= stackLabels.serverState %>)
+- `/feedback` — forms<% if (validation !== 'none') { %> + validation (<%= stackLabels.forms %><% if (validation !== 'none') { %> / <%= stackLabels.validation %><% } %>)<% } else { %> (<%= stackLabels.forms %>)<% } %>
+- `/about` — starter orientation
 - styling (<%= stackLabels.styling %>)
 <% if (uiLibrary !== 'none') { -%>
 - UI primitives (<%= stackLabels.uiLibrary %>)

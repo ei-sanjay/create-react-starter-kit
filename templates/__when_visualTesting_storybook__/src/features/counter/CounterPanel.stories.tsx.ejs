@@ -1,0 +1,25 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { CounterPanel } from '@/features/counter/CounterPanel';
+
+/**
+ * Client-state demo used on `/counter`.
+ * Interact with +/- to verify store wiring in isolation.
+ */
+const meta = {
+  title: 'Features/CounterPanel',
+  component: CounterPanel,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Demonstrates <%= stackLabels.stateManagement %> for ephemeral UI state. Prefer this over putting server entities into client stores.',
+      },
+    },
+  },
+} satisfies Meta<typeof CounterPanel>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};

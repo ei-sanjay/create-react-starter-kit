@@ -13,10 +13,8 @@ import { counterAtom } from '@/store';
 import { useAppState } from '@/store/context';
 <% } -%>
 import { UiButton } from '@/components/ui/UiButton';
-import { useToast } from '@/components/ui/Toast';
 
 export function CounterPanel() {
-  const { push } = useToast();
 <% if (stateManagement === 'redux') { -%>
   const value = useSelector((state<% if (isTypeScript) { %>: RootState<% } %>) => state.counter.value);
   const dispatch = useDispatch();
@@ -48,12 +46,20 @@ export function CounterPanel() {
         <p><%= stackLabels.stateManagement %> example — local interactive counter.</p>
       </header>
 <% if (stateManagement === 'none') { -%>
-      <p className="muted">Client state library was set to None. Add one later under <code>src/store</code>.</p>
+      <p className="muted">
+        Client state library was set to None. Add one later under <code>src/store</code>.
+      </p>
 <% } else { -%>
       <div className="counter">
-        <UiButton onClick={() => { onDec(); push('Decremented', 'info'); }}>−</UiButton>
-        <strong className="counter-value" aria-live="polite">{value}</strong>
-        <UiButton onClick={() => { onInc(); push('Incremented', 'success'); }}>+</UiButton>
+        <UiButton aria-label="Decrement" onClick={onDec}>
+          −
+        </UiButton>
+        <strong className="counter-value" data-testid="counter-value" aria-live="polite">
+          {value}
+        </strong>
+        <UiButton aria-label="Increment" onClick={onInc}>
+          +
+        </UiButton>
       </div>
 <% } -%>
       <p className="panel-note">

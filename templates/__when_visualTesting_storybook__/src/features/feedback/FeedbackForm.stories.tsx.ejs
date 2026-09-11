@@ -1,0 +1,25 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { FeedbackForm } from '@/features/feedback/FeedbackForm';
+
+/**
+ * Forms demo used on `/feedback`.
+ * Try empty submit for validation, then a valid payload for success status.
+ */
+const meta = {
+  title: 'Features/FeedbackForm',
+  component: FeedbackForm,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Built with <%= stackLabels.forms %><% if (validation !== 'none') { %> and <%= stackLabels.validation %><% } %>. Submits to the demo REST API.',
+      },
+    },
+  },
+} satisfies Meta<typeof FeedbackForm>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Empty: Story = {};

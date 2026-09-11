@@ -24,7 +24,6 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 <% if (uiLibrary === 'mui') { -%>
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 <% } -%>
-import { ToastProvider } from '@/components/ui/Toast';
 
 <% if (serverState === 'tanstack-query') { -%>
 const queryClient = new QueryClient({
@@ -89,5 +88,5 @@ export function AppProviders({ children }<% if (isTypeScript) { %>: AppProviders
   tree = <ChakraProvider value={defaultSystem}>{tree}</ChakraProvider>;
 <% } -%>
 
-  return <ToastProvider>{tree}</ToastProvider>;
+  return <>{tree}</>;
 }

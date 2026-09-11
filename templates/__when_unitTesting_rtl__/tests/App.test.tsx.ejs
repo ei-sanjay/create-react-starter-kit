@@ -1,11 +1,20 @@
 import { render, screen } from '@testing-library/react';
-import { AppProviders } from '@/app/providers';
+<% if (router === 'react-router') { -%>
+import { MemoryRouter } from 'react-router-dom';
+<% } -%>
+import { AppProviders } from '@/providers';
 import { HomePage } from '@/routes/HomePage';
 
 test('renders the project hero', () => {
   render(
     <AppProviders>
+<% if (router === 'react-router') { -%>
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+<% } else { -%>
       <HomePage />
+<% } -%>
     </AppProviders>,
   );
 

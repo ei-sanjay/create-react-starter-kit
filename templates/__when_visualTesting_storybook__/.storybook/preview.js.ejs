@@ -1,0 +1,40 @@
+import { AppProviders } from '../src/providers';
+<% if (router === 'react-router') { -%>
+import { MemoryRouter } from 'react-router-dom';
+<% } -%>
+import '../src/styles/global.<%= styling === 'sass' && uiLibrary !== 'shadcn' ? 'scss' : 'css' %>';
+
+/** @type { import('@storybook/react').Preview } */
+const preview = {
+  parameters: {
+    layout: 'padded',
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
+    },
+    docs: {
+      toc: true,
+    },
+  },
+  decorators: [
+    (Story) => (
+      <AppProviders>
+<% if (router === 'react-router') { -%>
+        <MemoryRouter>
+          <div style={{ maxWidth: 960, margin: '0 auto' }}>
+            <Story />
+          </div>
+        </MemoryRouter>
+<% } else { -%>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <Story />
+        </div>
+<% } -%>
+      </AppProviders>
+    ),
+  ],
+};
+
+export default preview;

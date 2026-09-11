@@ -13,6 +13,14 @@ interface AppLayoutProps {
 }
 <% } -%>
 
+const links = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/counter', label: 'Counter' },
+  { to: '/posts', label: 'Posts' },
+  { to: '/feedback', label: 'Feedback' },
+  { to: '/about', label: 'About' },
+] as const;
+
 export function AppLayout(<% if (router === 'tanstack-router') { %>{ children }<% if (isTypeScript) { %>: AppLayoutProps<% } %><% } %>) {
 <% if (router === 'tanstack-router') { -%>
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -30,19 +38,34 @@ export function AppLayout(<% if (router === 'tanstack-router') { %>{ children }<
         </div>
         <nav className="app-nav" aria-label="Primary">
 <% if (router === 'react-router') { -%>
-          <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            Home
-          </NavLink>
-          <NavLink to="/about" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            About
-          </NavLink>
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={'end' in link ? link.end : false}
+              className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+            >
+              {link.label}
+            </NavLink>
+          ))}
 <% } else { -%>
-          <Link to="/" className={pathname === '/' ? 'nav-link active' : 'nav-link'}>
-            Home
-          </Link>
-          <Link to="/about" className={pathname === '/about' ? 'nav-link active' : 'nav-link'}>
-            About
-          </Link>
+          {links.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={
+                link.to === '/'
+                  ? pathname === '/'
+                    ? 'nav-link active'
+                    : 'nav-link'
+                  : pathname.startsWith(link.to)
+                    ? 'nav-link active'
+                    : 'nav-link'
+              }
+            >
+              {link.label}
+            </Link>
+          ))}
 <% } -%>
         </nav>
       </header>

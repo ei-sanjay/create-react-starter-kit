@@ -1,0 +1,20 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Feedback page', () => {
+  test('shows validation errors for empty submit', async ({ page }) => {
+    await page.goto('/feedback');
+    await page.getByRole('button', { name: /Send feedback/i }).click();
+    await expect(page.locator('.field-error').first()).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('submits valid feedback', async ({ page }) => {
+    await page.goto('/feedback');
+    await page.getByPlaceholder('Ada Lovelace').fill('Ada Lovelace');
+    await page.getByPlaceholder('ada@example.com').fill('ada@example.com');
+    await page.getByPlaceholder('What should we improve?').fill('Please add more examples for routing.');
+    await page.getByRole('button', { name: /Send feedback/i }).click();
+    await expect(page.getByRole('status')).toContainText(/submitted successfully/i, {
+      timeout: 15_000,
+    });
+  });
+});

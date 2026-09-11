@@ -1,0 +1,35 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { StackBadge } from '@/components/StackBadge';
+
+const meta = {
+  title: 'Components/StackBadge',
+  component: StackBadge,
+  tags: ['autodocs'],
+  args: {
+    label: 'Build',
+    value: '<%= stackLabels.buildTool %>',
+  },
+} satisfies Meta<typeof StackBadge>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+
+export const Language: Story = {
+  args: {
+    label: 'Language',
+    value: '<%= stackLabels.language %>',
+  },
+};
+
+export const Row: Story = {
+  render: () => (
+    <div className="stack-row">
+      <StackBadge label="Build" value="<%= stackLabels.buildTool %>" />
+      <StackBadge label="Router" value="<%= stackLabels.router %>" />
+      <StackBadge label="State" value="<%= stackLabels.stateManagement %>" />
+      <StackBadge label="Data" value="<%= stackLabels.serverState %>" />
+    </div>
+  ),
+};

@@ -1,0 +1,58 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { PostsPanel } from '@/features/posts/PostsPanel';
+import { renderWithProviders } from './test-utils';
+
+vi.mock('@/services/api', async (importOriginal) => {
+  const actual = await importOriginal<% if (isTypeScript) { %><typeof import('@/services/api')><% } %>();
+  return {
+    ...actual,
+    fetchPosts: vi.fn(async () => [
+      { userId: 1, id: 1, title: 'Alpha post', body: 'body-1' },
+      { userId: 1, id: 2, title: 'Beta post', body: 'body-2' },
+    ]),
+  };
+});
+
+<% if (serverState === 'rtk-query') { -%>
+// RTK Query uses its own endpoint; mock still covers the transport used by other modes.
+<% } -%>
+
+describe('PostsPanel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+<% if (serverState === 'rtk-query') { -%>
+  it('renders the posts panel chrome', async () => {
+    renderWithProviders(<PostsPanel />);
+    expect(screen.getByRole('heading', { name: 'Server state' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Refresh/i })).toBeInTheDocument();
+  });
+<% } else { -%>
+  it('renders fetched posts', async () => {
+    renderWithProviders(<PostsPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Alpha post/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Beta post/i)).toBeInTheDocument();
+  });
+
+  it('refreshes posts when Refresh is clicked', async () => {
+    const user = userEvent.setup();
+    const { fetchPosts } = await import('@/services/api');
+    renderWithProviders(<PostsPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Alpha post/i)).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: /Refresh/i }));
+    await waitFor(() => {
+      expect(fetchPosts).toHaveBeenCalled();
+    });
+  });
+<% } -%>
+});

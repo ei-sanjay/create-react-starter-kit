@@ -90,8 +90,21 @@ body {
 
 .hero h1,
 .about-page h1,
+.page-intro h1,
 .panel-header h2 {
   @apply m-0 font-display tracking-tight text-slate-900;
+}
+
+.page-intro {
+  @apply mb-6;
+}
+
+.page-intro h1 {
+  @apply mt-2 text-3xl sm:text-4xl;
+}
+
+.success-text {
+  @apply text-sm text-[var(--ok)];
 }
 
 .hero h1 {
@@ -181,27 +194,7 @@ body {
 }
 
 .ui-button {
-  @apply inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-50;
-}
-
-.toast-viewport {
-  @apply pointer-events-none fixed bottom-4 right-4 z-50 flex w-80 flex-col gap-2;
-}
-
-.toast {
-  @apply rounded-xl border px-4 py-3 text-sm shadow-lg;
-}
-
-.toast-info {
-  @apply border-slate-200 bg-white text-slate-800;
-}
-
-.toast-success {
-  @apply border-green-200 bg-green-50 text-[var(--ok)];
-}
-
-.toast-error {
-  @apply border-red-200 bg-red-50 text-[var(--bad)];
+  @apply inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white no-underline transition hover:bg-brand-700 disabled:opacity-50;
 }
 
 .about-list {
@@ -265,10 +258,6 @@ body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #f8fafc
 .panel-note { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed #e2e8f0; font-size: 0.75rem; line-height: 1.5; }
 .ui-button { appearance: none; border: 0; background: var(--brand); color: #fff; border-radius: 0.5rem; padding: 0.55rem 1rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; }
 .ui-button:disabled { opacity: 0.5; }
-.toast-viewport { position: fixed; right: 1rem; bottom: 1rem; width: 20rem; display: grid; gap: 0.5rem; z-index: 50; }
-.toast { border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.875rem; box-shadow: var(--shadow); background: #fff; border: 1px solid var(--line); }
-.toast-success { background: #f0fdf4; border-color: #bbf7d0; color: var(--ok); }
-.toast-error { background: #fef2f2; border-color: #fecaca; color: var(--bad); }
 .about-list { margin: 1rem 0; padding-left: 1.25rem; }
 <% } else if (styling === 'styled-components') { -%>
 /* Global reset — most styling lives in styled components; keep layout tokens here */
@@ -335,10 +324,6 @@ body {
 .panel-note { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed #e2e8f0; font-size: 0.75rem; line-height: 1.5; }
 .ui-button { appearance: none; border: 0; background: var(--brand); color: #fff; border-radius: 0.5rem; padding: 0.55rem 1rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; }
 .ui-button:disabled { opacity: 0.5; }
-.toast-viewport { position: fixed; right: 1rem; bottom: 1rem; width: 20rem; display: grid; gap: 0.5rem; z-index: 50; }
-.toast { border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.875rem; box-shadow: var(--shadow); background: #fff; border: 1px solid var(--line); }
-.toast-success { background: #f0fdf4; border-color: #bbf7d0; color: var(--ok); }
-.toast-error { background: #fef2f2; border-color: #fecaca; color: var(--bad); }
 .about-list { margin: 1rem 0; padding-left: 1.25rem; }
 <% } else { -%>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
@@ -449,9 +434,5 @@ body {
   padding: 0.55rem 1rem; font-size: 0.875rem; font-weight: 500; cursor: pointer;
   &:disabled { opacity: 0.5; }
 }
-.toast-viewport { position: fixed; right: 1rem; bottom: 1rem; width: 20rem; display: grid; gap: 0.5rem; z-index: 50; }
-.toast { border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.875rem; box-shadow: $shadow; background: #fff; border: 1px solid $line; }
-.toast-success { background: #f0fdf4; border-color: #bbf7d0; color: $ok; }
-.toast-error { background: #fef2f2; border-color: #fecaca; color: $bad; }
 .about-list { margin: 1rem 0; padding-left: 1.25rem; }
 <% } -%>

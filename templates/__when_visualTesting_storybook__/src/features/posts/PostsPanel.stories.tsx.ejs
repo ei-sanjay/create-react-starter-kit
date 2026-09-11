@@ -1,0 +1,25 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { PostsPanel } from '@/features/posts/PostsPanel';
+
+/**
+ * Server-state demo used on `/posts`.
+ * Needs network access to JSONPlaceholder (or your `VITE_API_BASE_URL`).
+ */
+const meta = {
+  title: 'Features/PostsPanel',
+  component: PostsPanel,
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Fetches posts with <%= stackLabels.serverState === 'None' ? stackLabels.apiLayer : stackLabels.serverState %>. Use Refresh to exercise refetch behavior.',
+      },
+    },
+  },
+} satisfies Meta<typeof PostsPanel>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};

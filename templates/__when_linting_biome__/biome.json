@@ -1,5 +1,17 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "ignore": [
+      "node_modules",
+      "dist",
+      "build",
+      "coverage",
+      "storybook-static",
+      ".parcel-cache",
+      "playwright-report",
+      "test-results"
+    ]
+  },
   "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,

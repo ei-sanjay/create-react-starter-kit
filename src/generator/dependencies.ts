@@ -232,6 +232,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
     case 'storybook':
       devDependencies['storybook'] = '^8.6.4';
       devDependencies['@storybook/react'] = '^8.6.4';
+      devDependencies['@storybook/addon-essentials'] = '^8.6.4';
       if (answers.buildTool === 'vite' || answers.buildTool === 'esbuild') {
         devDependencies['@storybook/react-vite'] = '^8.6.4';
       } else {
@@ -342,9 +343,25 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
   }
 
   if (answers.formatting === 'prettier') {
-    scripts.format = 'prettier --write .';
+    const srcExt =
+      answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx';
+    const prettierGlobs = [
+      `"src/**/*.{${srcExt},css,scss,md,json}"`,
+      `"tests/**/*.{${srcExt}}"`,
+      '"docs/**/*.md"',
+      '"*.{json,md,cjs,mjs,ts,js}"',
+    ];
+    if (answers.visualTesting === 'storybook') {
+      prettierGlobs.push('".storybook/**/*.{js,cjs,mjs,ts,tsx}"');
+    }
+    if (answers.e2eTesting === 'cypress') {
+      prettierGlobs.push(`"cypress/**/*.{${srcExt}}"`);
+    }
+    const joined = prettierGlobs.join(' ');
+    scripts.format = `prettier --write ${joined}`;
+    scripts['format:check'] = `prettier --check ${joined}`;
   } else {
-    scripts.format = 'stylelint "**/*.{css,scss}" --fix';
+    scripts.format = 'stylelint "src/**/*.{css,scss}" --fix';
   }
 
   switch (answers.unitTesting) {
@@ -363,6 +380,8 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
 
   if (answers.e2eTesting === 'playwright') {
     scripts['test:e2e'] = 'playwright test';
+    scripts['test:e2e:ui'] = 'playwright test --ui';
+    scripts['test:e2e:install'] = 'playwright install chromium';
   } else if (answers.e2eTesting === 'cypress') {
     scripts['test:e2e'] = 'cypress run';
     scripts['cypress:open'] = 'cypress open';

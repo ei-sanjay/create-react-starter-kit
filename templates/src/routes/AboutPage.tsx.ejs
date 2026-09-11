@@ -4,26 +4,27 @@ export function AboutPage() {
       <h1>About this starter</h1>
       <p>
         Generated with <strong>create-react-starter-kit</strong> using a scalable{' '}
-        <strong>feature-based</strong> layout (domain modules under <code>src/features</code>) —
-        the same organizational approach used across large production React codebases.
+        <strong>feature-based</strong> layout (domain modules under <code>src/features</code>).
       </p>
       <ul className="about-list">
         <li>
-          <strong>Extend features</strong> under <code>src/features/&lt;name&gt;/</code> — keep
-          domain logic close to the UI that owns it.
+          <strong>Routes:</strong> <code>/</code>, <code>/counter</code>, <code>/posts</code>,{' '}
+          <code>/feedback</code>, <code>/about</code>
         </li>
         <li>
-          <strong>Shared primitives</strong> live in <code>src/components/</code> and{' '}
-          <code>src/lib/</code>. Prefer imports via the <code>@/</code> path alias.
+          <strong>Extend features</strong> under <code>src/features/&lt;name&gt;/</code>.
         </li>
         <li>
-          <strong>Docs</strong> in <code>docs/</code> explain architecture, testing, and production
-          habits for this stack.
+          <strong>Shared UI</strong> lives in <code>src/components/</code>. Prefer the{' '}
+          <code>@/</code> path alias.
+        </li>
+        <li>
+          <strong>Bootstrap</strong> is in <code>src/main.<%= jsxExt %></code> with providers in{' '}
+          <code>src/providers.<%= jsxExt %></code> and routing in <code>src/App.<%= jsxExt %></code>.
         </li>
       </ul>
       <p>
-        Prefer reading <code>docs/getting-started.md</code> next, then{' '}
-        <code>docs/selected-stack.md</code> for library-specific guidance.
+        Read <code>docs/getting-started.md</code> next, then <code>docs/selected-stack.md</code>.
       </p>
     </div>
   );

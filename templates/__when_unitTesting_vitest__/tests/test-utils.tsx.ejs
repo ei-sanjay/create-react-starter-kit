@@ -1,0 +1,50 @@
+<% if (isTypeScript) { -%>
+import type { ReactElement, ReactNode } from 'react';
+<% } -%>
+import { render } from '@testing-library/react';
+<% if (router === 'react-router') { -%>
+import { MemoryRouter } from 'react-router-dom';
+<% } -%>
+import { AppProviders } from '@/providers';
+
+<% if (isTypeScript) { -%>
+interface Options {
+  route?: string;
+}
+
+function Wrapper({ children, route = '/' }: { children: ReactNode; route?: string }) {
+<% if (router === 'react-router') { -%>
+  return (
+    <AppProviders>
+      <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+    </AppProviders>
+  );
+<% } else { -%>
+  return <AppProviders>{children}</AppProviders>;
+<% } -%>
+}
+
+export function renderWithProviders(ui: ReactElement, options: Options = {}) {
+  return render(ui, {
+    wrapper: ({ children }) => <Wrapper route={options.route}>{children}</Wrapper>,
+  });
+}
+<% } else { -%>
+function Wrapper({ children, route = '/' }) {
+<% if (router === 'react-router') { -%>
+  return (
+    <AppProviders>
+      <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+    </AppProviders>
+  );
+<% } else { -%>
+  return <AppProviders>{children}</AppProviders>;
+<% } -%>
+}
+
+export function renderWithProviders(ui, options = {}) {
+  return render(ui, {
+    wrapper: ({ children }) => <Wrapper route={options.route}>{children}</Wrapper>,
+  });
+}
+<% } -%>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 <% if (forms === 'react-hook-form') { -%>
 import { useForm } from 'react-hook-form';
 <% if (validation === 'zod') { -%>
@@ -25,7 +26,6 @@ import { feedbackSchema } from '@/lib/validation';
 import type { FeedbackValues } from '@/lib/validation';
 <% } -%>
 <% } else { -%>
-import { useState } from 'react';
 <% if (validation === 'none') { -%>
 import { validateFeedback<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
 <% } else { -%>
@@ -33,7 +33,6 @@ import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } f
 <% } -%>
 <% } -%>
 import { createFeedback } from '@/services/api';
-import { useToast } from '@/components/ui/Toast';
 import { UiButton } from '@/components/ui/UiButton';
 
 const defaults<% if (isTypeScript) { %>: FeedbackValues<% } %> = {
@@ -43,7 +42,7 @@ const defaults<% if (isTypeScript) { %>: FeedbackValues<% } %> = {
 };
 
 export function FeedbackForm() {
-  const { push } = useToast();
+  const [status, setStatus] = useState<% if (isTypeScript) { %><string | null><% } %>(null);
 
 <% if (forms === 'react-hook-form') { -%>
   const {
@@ -71,7 +70,7 @@ export function FeedbackForm() {
     }
 <% } -%>
     await createFeedback(values);
-    push('Feedback submitted (demo API)', 'success');
+    setStatus('Feedback submitted successfully (demo API).');
     reset();
   };
 
@@ -107,6 +106,11 @@ export function FeedbackForm() {
           {isSubmitting ? 'Sending…' : 'Send feedback'}
         </UiButton>
       </form>
+      {status && (
+        <p className="success-text" role="status">
+          {status}
+        </p>
+      )}
       <p className="panel-note">
         <strong>When to use:</strong> complex forms with validation and async submit.
         <br />
@@ -137,7 +141,7 @@ export function FeedbackForm() {
           feedbackSchema.parse(values);
 <% } -%>
           await createFeedback(values);
-          push('Feedback submitted (demo API)', 'success');
+          setStatus('Feedback submitted successfully (demo API).');
           helpers.resetForm();
         }}
       >
@@ -164,6 +168,11 @@ export function FeedbackForm() {
           </Form>
         )}
       </Formik>
+      {status && (
+        <p className="success-text" role="status">
+          {status}
+        </p>
+      )}
       <p className="panel-note">
         <strong>When to use:</strong> form-heavy screens with Formik's render/props model.
         <br />
@@ -187,7 +196,7 @@ export function FeedbackForm() {
       if (result.error) throw result.error;
 <% } -%>
       await createFeedback(value);
-      push('Feedback submitted (demo API)', 'success');
+      setStatus('Feedback submitted successfully (demo API).');
       form.reset();
     },
   });
@@ -255,6 +264,11 @@ export function FeedbackForm() {
         </form.Field>
         <UiButton type="submit">Send feedback</UiButton>
       </form>
+      {status && (
+        <p className="success-text" role="status">
+          {status}
+        </p>
+      )}
       <p className="panel-note">
         <strong>When to use:</strong> headless, type-safe forms with fine-grained reactivity.
         <br />
@@ -315,7 +329,7 @@ export function FeedbackForm() {
     setIsSubmitting(true);
     try {
       await createFeedback(values);
-      push('Feedback submitted (demo API)', 'success');
+      setStatus('Feedback submitted successfully (demo API).');
       setValues(defaults);
     } finally {
       setIsSubmitting(false);
@@ -362,6 +376,11 @@ export function FeedbackForm() {
           {isSubmitting ? 'Sending…' : 'Send feedback'}
         </UiButton>
       </form>
+      {status && (
+        <p className="success-text" role="status">
+          {status}
+        </p>
+      )}
       <p className="panel-note">
         <strong>When to use:</strong> simple forms without a dedicated form library.
         <br />

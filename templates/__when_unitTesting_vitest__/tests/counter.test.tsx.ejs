@@ -1,0 +1,36 @@
+import { describe, expect, it } from 'vitest';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CounterPanel } from '@/features/counter/CounterPanel';
+import { renderWithProviders } from './test-utils';
+
+describe('CounterPanel', () => {
+<% if (stateManagement === 'none') { -%>
+  it('shows guidance when no state library is selected', () => {
+    renderWithProviders(<CounterPanel />);
+    expect(screen.getByText(/Client state library was set to None/i)).toBeInTheDocument();
+  });
+<% } else { -%>
+  it('starts at 0 and updates when increment/decrement are clicked', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CounterPanel />);
+
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('0');
+
+    await user.click(screen.getByRole('button', { name: 'Increment' }));
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('1');
+
+    await user.click(screen.getByRole('button', { name: 'Increment' }));
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('2');
+
+    await user.click(screen.getByRole('button', { name: 'Decrement' }));
+    expect(screen.getByTestId('counter-value')).toHaveTextContent('1');
+  });
+
+  it('exposes accessible button labels', () => {
+    renderWithProviders(<CounterPanel />);
+    expect(screen.getByRole('button', { name: 'Increment' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Decrement' })).toBeInTheDocument();
+  });
+<% } -%>
+});

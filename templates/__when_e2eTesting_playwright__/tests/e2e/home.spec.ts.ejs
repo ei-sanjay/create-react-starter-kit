@@ -1,6 +1,33 @@
 import { test, expect } from '@playwright/test';
 
-test('home page loads', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: /<%= projectName %>/i })).toBeVisible();
+test.describe('Home', () => {
+  test('loads hero and demo links', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: /<%= projectName %>/i })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Go to counter/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Go to posts/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Go to feedback/i })).toBeVisible();
+  });
+});
+
+test.describe('Navigation', () => {
+  test('can visit each primary route', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Counter', exact: true }).click();
+    await expect(page).toHaveURL(/\/counter/);
+    await expect(page.getByRole('heading', { name: 'Counter' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Posts', exact: true }).click();
+    await expect(page).toHaveURL(/\/posts/);
+    await expect(page.getByRole('heading', { name: 'Posts' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Feedback', exact: true }).click();
+    await expect(page).toHaveURL(/\/feedback/);
+    await expect(page.getByRole('heading', { name: 'Feedback' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'About', exact: true }).click();
+    await expect(page).toHaveURL(/\/about/);
+    await expect(page.getByRole('heading', { name: /About/i })).toBeVisible();
+  });
 });

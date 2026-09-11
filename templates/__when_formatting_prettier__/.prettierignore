@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.rspack-profile-*/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# Generated / lockfiles
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.tgz
+*.tsbuildinfo
+
+# Env / misc
+.env
+.env.*
+public/
