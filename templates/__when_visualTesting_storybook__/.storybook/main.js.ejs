@@ -1,3 +1,11 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+<% if (buildTool === 'vite' || buildTool === 'esbuild') { -%>
+import { mergeConfig } from 'vite';
+<% } -%>
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type { import('@storybook/<%= buildTool === 'vite' || buildTool === 'esbuild' ? 'react-vite' : 'react-webpack5' %>').StorybookConfig } */
 const config = {
   stories: ['../src/**/*.stories.@(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)'],
@@ -9,6 +17,26 @@ const config = {
   docs: {
     autodocs: 'tag',
   },
+<% if (buildTool === 'vite' || buildTool === 'esbuild') { -%>
+  async viteFinal(config) {
+    return mergeConfig(config, {
+      resolve: {
+        alias: {
+          '@': path.resolve(dirname, '../src'),
+        },
+      },
+    });
+  },
+<% } else { -%>
+  async webpackFinal(config) {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@': path.resolve(dirname, '../src'),
+    };
+    return config;
+  },
+<% } -%>
 };
 
 export default config;

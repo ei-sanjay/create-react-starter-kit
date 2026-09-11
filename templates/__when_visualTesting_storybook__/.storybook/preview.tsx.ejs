@@ -1,11 +1,13 @@
+<% if (isTypeScript) { -%>
+import type { Preview } from '@storybook/react';
+<% } -%>
 import { AppProviders } from '../src/providers';
 <% if (router === 'react-router') { -%>
 import { MemoryRouter } from 'react-router-dom';
 <% } -%>
 import '../src/styles/global.<%= styling === 'sass' && uiLibrary !== 'shadcn' ? 'scss' : 'css' %>';
 
-/** @type { import('@storybook/react').Preview } */
-const preview = {
+const preview<% if (isTypeScript) { %>: Preview<% } %> = {
   parameters: {
     layout: 'padded',
     controls: {
