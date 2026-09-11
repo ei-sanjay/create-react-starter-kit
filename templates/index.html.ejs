@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="<%= buildTool === 'vite' ? '/vite.svg' : '/vite.svg' %>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= projectName %></title>
   </head>
@@ -15,5 +15,6 @@
 <% } else if (buildTool === 'esbuild' || buildTool === 'rollup') { -%>
     <script type="module" src="/dist/main.js"></script>
 <% } -%>
+<%# webpack/rspack: HtmlWebpackPlugin injects the bundle — no manual script tag %>
   </body>
 </html>

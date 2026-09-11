@@ -324,7 +324,7 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
   };
 
   if (answers.packageManager === 'npm') {
-    pkg.workspaces = ['packages/*'];
+    // Keep npm as the package manager without forcing a monorepo layout.
   }
 
   if (answers.buildTool === 'parcel') {

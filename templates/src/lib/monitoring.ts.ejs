@@ -2,7 +2,7 @@
 import * as Sentry from '@sentry/react';
 
 export function initMonitoring() {
-  const dsn = import.meta.env?.VITE_SENTRY_DSN;
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
   if (!dsn) {
     return;
   }
@@ -10,7 +10,7 @@ export function initMonitoring() {
   Sentry.init({
     dsn,
     tracesSampleRate: 0.1,
-    environment: import.meta.env?.MODE ?? 'development',
+    environment: import.meta.env.MODE || 'development',
   });
 }
 <% } else if (errorTracking === 'bugsnag') { -%>
@@ -18,7 +18,7 @@ import Bugsnag from '@bugsnag/js';
 import BugsnagPluginReact from '@bugsnag/plugin-react';
 
 export function initMonitoring() {
-  const apiKey = import.meta.env?.VITE_BUGSNAG_API_KEY;
+  const apiKey = import.meta.env.VITE_BUGSNAG_API_KEY;
   if (!apiKey) {
     return;
   }
@@ -32,7 +32,7 @@ export function initMonitoring() {
 import LogRocket from 'logrocket';
 
 export function initMonitoring() {
-  const appId = import.meta.env?.VITE_LOGROCKET_APP_ID;
+  const appId = import.meta.env.VITE_LOGROCKET_APP_ID;
   if (!appId) {
     return;
   }
@@ -43,8 +43,8 @@ export function initMonitoring() {
 import { datadogRum } from '@datadog/browser-rum';
 
 export function initMonitoring() {
-  const applicationId = import.meta.env?.VITE_DATADOG_APPLICATION_ID;
-  const clientToken = import.meta.env?.VITE_DATADOG_CLIENT_TOKEN;
+  const applicationId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
+  const clientToken = import.meta.env.VITE_DATADOG_CLIENT_TOKEN;
   if (!applicationId || !clientToken) {
     return;
   }
@@ -52,7 +52,7 @@ export function initMonitoring() {
   datadogRum.init({
     applicationId,
     clientToken,
-    site: import.meta.env?.VITE_DATADOG_SITE ?? 'datadoghq.com',
+    site: import.meta.env.VITE_DATADOG_SITE || 'datadoghq.com',
     service: '<%= projectName %>',
     sessionSampleRate: 100,
     trackResources: true,

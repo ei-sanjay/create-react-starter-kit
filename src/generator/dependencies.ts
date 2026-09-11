@@ -36,9 +36,16 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       devDependencies['@babel/core'] = '^7.26.10';
       devDependencies['@babel/preset-env'] = '^7.26.9';
       devDependencies['@babel/preset-react'] = '^7.26.3';
+      devDependencies['dotenv'] = '^16.4.7';
+      devDependencies['copy-webpack-plugin'] = '^12.0.2';
       if (isTs) {
         devDependencies['@babel/preset-typescript'] = '^7.26.0';
-        devDependencies['ts-loader'] = '^9.5.2';
+      }
+      if (answers.styling === 'tailwind' || answers.uiLibrary === 'shadcn') {
+        devDependencies['postcss-loader'] = '^8.1.1';
+      }
+      if (answers.styling === 'sass') {
+        devDependencies['sass-loader'] = '^16.0.5';
       }
       break;
     case 'rspack':
@@ -237,7 +244,10 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
         devDependencies['@storybook/react-vite'] = '^8.6.4';
       } else {
         devDependencies['@storybook/react-webpack5'] = '^8.6.4';
+        // Storybook 8 webpack builder needs an explicit compiler for TS/JSX.
+        devDependencies['@storybook/addon-webpack5-compiler-babel'] = '^3.0.5';
       }
+      devDependencies['@storybook/test'] = '^8.6.4';
       break;
     case 'chromatic':
       devDependencies['chromatic'] = '^11.27.0';
@@ -314,6 +324,7 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     case 'webpack':
       scripts.dev = 'webpack serve --mode development';
       scripts.build = 'webpack --mode production';
+      scripts.preview = 'webpack serve --mode production --open';
       break;
     case 'rspack':
       scripts.dev = 'rspack serve';

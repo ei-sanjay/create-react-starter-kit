@@ -1,15 +1,33 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import webpack from 'webpack';
 <% if (buildTool === 'vite' || buildTool === 'esbuild') { -%>
 import { mergeConfig } from 'vite';
 <% } -%>
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const metaEnv = {
+  MODE: 'development',
+  VITE_API_BASE_URL:
+    process.env.VITE_API_BASE_URL || 'https://jsonplaceholder.typicode.com',
+  VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN || '',
+  VITE_BUGSNAG_API_KEY: process.env.VITE_BUGSNAG_API_KEY || '',
+  VITE_LOGROCKET_APP_ID: process.env.VITE_LOGROCKET_APP_ID || '',
+  VITE_DATADOG_APPLICATION_ID: process.env.VITE_DATADOG_APPLICATION_ID || '',
+  VITE_DATADOG_CLIENT_TOKEN: process.env.VITE_DATADOG_CLIENT_TOKEN || '',
+  VITE_DATADOG_SITE: process.env.VITE_DATADOG_SITE || 'datadoghq.com',
+};
+
 /** @type { import('@storybook/<%= buildTool === 'vite' || buildTool === 'esbuild' ? 'react-vite' : 'react-webpack5' %>').StorybookConfig } */
 const config = {
   stories: ['../src/**/*.stories.@(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)'],
-  addons: ['@storybook/addon-essentials'],
+  addons: [
+    '@storybook/addon-essentials',
+<% if (buildTool !== 'vite' && buildTool !== 'esbuild') { -%>
+    '@storybook/addon-webpack5-compiler-babel',
+<% } -%>
+  ],
   framework: {
     name: '@storybook/<%= buildTool === 'vite' || buildTool === 'esbuild' ? 'react-vite' : 'react-webpack5' %>',
     options: {},
@@ -25,6 +43,9 @@ const config = {
           '@': path.resolve(dirname, '../src'),
         },
       },
+      define: {
+        'import.meta.env': JSON.stringify(metaEnv),
+      },
     });
   },
 <% } else { -%>
@@ -34,6 +55,31 @@ const config = {
       ...(config.resolve.alias ?? {}),
       '@': path.resolve(dirname, '../src'),
     };
+    config.plugins = config.plugins ?? [];
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'import.meta.env': JSON.stringify(metaEnv),
+      }),
+    );
+<% if (styling === 'tailwind' || uiLibrary === 'shadcn') { -%>
+    // Ensure Tailwind/PostCSS runs for story source CSS.
+    config.module = config.module ?? {};
+    config.module.rules = config.module.rules ?? [];
+    for (const rule of config.module.rules) {
+      if (!rule || typeof rule !== 'object' || !('test' in rule) || !rule.test) continue;
+      const test = rule.test.toString();
+      if (!test.includes('css')) continue;
+      const use = Array.isArray(rule.use) ? rule.use : rule.use ? [rule.use] : [];
+      const hasPostcss = use.some((entry) => {
+        const loader = typeof entry === 'string' ? entry : entry?.loader;
+        return typeof loader === 'string' && loader.includes('postcss');
+      });
+      if (!hasPostcss) {
+        use.push('postcss-loader');
+        rule.use = use;
+      }
+    }
+<% } -%>
     return config;
   },
 <% } -%>

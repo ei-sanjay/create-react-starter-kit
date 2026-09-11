@@ -1,68 +1,118 @@
-<% if (isTypeScript) { -%>
-import type { Configuration } from 'webpack';
-import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
-<% } -%>
 import path from 'node:path';
+import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import dotenv from 'dotenv';
 
-<% if (isTypeScript) { -%>
-const config: Configuration & { devServer?: DevServerConfiguration } = {
-<% } else { -%>
-const config = {
+dotenv.config();
+
+/**
+ * @param {Record<string, string>} _env
+ * @param {{ mode?: string }} argv
+ */
+export default (_env, argv) => {
+  const mode = argv.mode || 'development';
+  const isProd = mode === 'production';
+
+  const metaEnv = {
+    MODE: mode,
+    VITE_API_BASE_URL:
+      process.env.VITE_API_BASE_URL || 'https://jsonplaceholder.typicode.com',
+    VITE_SENTRY_DSN: process.env.VITE_SENTRY_DSN || '',
+    VITE_BUGSNAG_API_KEY: process.env.VITE_BUGSNAG_API_KEY || '',
+    VITE_LOGROCKET_APP_ID: process.env.VITE_LOGROCKET_APP_ID || '',
+    VITE_DATADOG_APPLICATION_ID: process.env.VITE_DATADOG_APPLICATION_ID || '',
+    VITE_DATADOG_CLIENT_TOKEN: process.env.VITE_DATADOG_CLIENT_TOKEN || '',
+    VITE_DATADOG_SITE: process.env.VITE_DATADOG_SITE || 'datadoghq.com',
+  };
+
+  const cssLoaders = [
+    'style-loader',
+    {
+      loader: 'css-loader',
+      options: {
+        importLoaders: 1,
+<% if (styling === 'css-modules') { -%>
+        modules: {
+          auto: true,
+          localIdentName: isProd ? '[hash:base64:8]' : '[name]__[local]--[hash:base64:5]',
+        },
 <% } -%>
-  entry: './src/main.<%= jsxExt %>',
-  output: {
-    path: path.resolve('dist'),
-    filename: '[name].[contenthash].js',
-    clean: true,
-    publicPath: '/',
-  },
-  resolve: {
-    extensions: ['.<%= jsxExt %>', '.<%= ext %>', '.js', '.jsx', '.json'],
-    alias: {
-      '@': path.resolve('src'),
+      },
     },
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              ['@babel/preset-react', { runtime: 'automatic' }],
-<% if (isTypeScript) { -%>
-              '@babel/preset-typescript',
+<% if (styling === 'tailwind' || uiLibrary === 'shadcn') { -%>
+    'postcss-loader',
 <% } -%>
-            ],
+  ];
+
+  return {
+    entry: './src/main.<%= jsxExt %>',
+    output: {
+      path: path.resolve('dist'),
+      filename: isProd ? '[name].[contenthash].js' : '[name].js',
+      clean: true,
+      publicPath: '/',
+    },
+    resolve: {
+      extensions: ['.<%= jsxExt %>', '.<%= ext %>', '.js', '.jsx', '.json'],
+      alias: {
+        '@': path.resolve('src'),
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                '@babel/preset-env',
+                ['@babel/preset-react', { runtime: 'automatic' }],
+<% if (isTypeScript) { -%>
+                '@babel/preset-typescript',
+<% } -%>
+              ],
+            },
           },
         },
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'<% if (styling === 'sass') { %>, 'sass-loader'<% } %>],
-      },
+        {
+          test: /\.css$/,
+          use: cssLoaders,
+        },
 <% if (styling === 'sass') { -%>
-      {
-        test: /\.scss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
-      },
+        {
+          test: /\.scss$/,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        },
 <% } -%>
+        {
+          test: /\.(png|jpe?g|gif|svg|woff2?|ttf|eot)$/i,
+          type: 'asset',
+        },
+      ],
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './index.html',
+      }),
+      new CopyWebpackPlugin({
+        patterns: [{ from: 'public', to: '.', noErrorOnMissing: true }],
+      }),
+      new webpack.DefinePlugin({
+        'import.meta.env': JSON.stringify(metaEnv),
+      }),
     ],
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './index.html',
-    }),
-  ],
-  devServer: {
-    port: 5173,
-    historyApiFallback: true,
-    hot: true,
-  },
+    devServer: {
+      port: 5173,
+      historyApiFallback: true,
+      hot: true,
+      open: false,
+    },
+    devtool: isProd ? 'source-map' : 'eval-cheap-module-source-map',
+    performance: {
+      hints: false,
+    },
+  };
 };
-
-export default config;
