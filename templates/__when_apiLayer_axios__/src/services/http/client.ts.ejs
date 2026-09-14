@@ -109,7 +109,7 @@ apiClient.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: apiError }));
     }
 
-    if (import.meta.env.MODE !== 'production') {
+    if (<% if (buildTool === 'parcel') { %>process.env.NODE_ENV<% } else { %>import.meta.env.MODE<% } %> !== 'production') {
       console.error('[api]', {
         message: apiError.message,
         status: apiError.status,

@@ -1,9 +1,0 @@
-{
-  "extends": "parcel-bundler/lib/utils",
-  "source": "index.html",
-  "targets": {
-    "default": {
-      "distDir": "./dist"
-    }
-  }
-}

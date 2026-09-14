@@ -57,6 +57,10 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       break;
     case 'parcel':
       devDependencies['parcel'] = '^2.14.1';
+      // Parcel injects env via process.env; TS needs Node types.
+      if (isTs) {
+        devDependencies['@types/node'] = '^22.13.10';
+      }
       break;
   }
 
@@ -187,6 +191,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
   // Unit testing
   switch (answers.unitTesting) {
     case 'vitest':
+      // RTL is the component-testing layer; Vitest is the runner — always pair them.
       devDependencies['vitest'] = '^3.0.8';
       devDependencies['@testing-library/react'] = '^16.2.0';
       devDependencies['@testing-library/jest-dom'] = '^6.6.3';
@@ -201,6 +206,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
     case 'jest':
       devDependencies['jest'] = '^29.7.0';
       devDependencies['jest-environment-jsdom'] = '^29.7.0';
+      // RTL is the component-testing layer; Jest/Vitest are runners — always pair them.
       devDependencies['@testing-library/react'] = '^16.2.0';
       devDependencies['@testing-library/jest-dom'] = '^6.6.3';
       devDependencies['@testing-library/user-event'] = '^14.6.1';
@@ -208,11 +214,6 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
         devDependencies['ts-jest'] = '^29.2.6';
         devDependencies['@types/jest'] = '^29.5.14';
       }
-      break;
-    case 'rtl':
-      devDependencies['@testing-library/react'] = '^16.2.0';
-      devDependencies['@testing-library/jest-dom'] = '^6.6.3';
-      devDependencies['@testing-library/user-event'] = '^14.6.1';
       break;
   }
 
@@ -324,8 +325,9 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
       scripts.preview = 'rsbuild preview';
       break;
     case 'parcel':
-      scripts.dev = 'parcel index.html';
+      scripts.dev = 'parcel index.html --port 5173';
       scripts.build = 'parcel build index.html';
+      scripts.preview = 'parcel serve dist --port 5173 --open';
       break;
   }
 
@@ -368,9 +370,6 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     case 'jest':
       scripts.test = 'jest';
       scripts['test:watch'] = 'jest --watch';
-      break;
-    case 'rtl':
-      scripts.test = 'echo "Configure your test runner for RTL"';
       break;
   }
 

@@ -23,11 +23,13 @@ export default defineConfig({
           ? 'npx webpack serve --mode development --port 3000'
           : buildTool === 'rsbuild'
             ? 'npx rsbuild dev --port 3000'
-            : packageManager === 'npm'
-              ? 'npm run dev'
-              : packageManager === 'yarn'
-                ? 'yarn dev'
-                : 'pnpm dev' %>',
+            : buildTool === 'parcel'
+              ? 'npx parcel index.html --port 5173'
+              : packageManager === 'npm'
+                ? 'npm run dev'
+                : packageManager === 'yarn'
+                  ? 'yarn dev'
+                  : 'pnpm dev' %>',
     url: 'http://127.0.0.1:<%= e2ePort %>',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -13,7 +13,7 @@ export type UiLibrary =
   | 'shadcn'
   | 'headless-ui'
   | 'none';
-export type UnitTesting = 'vitest' | 'jest' | 'rtl' | 'none';
+export type UnitTesting = 'vitest' | 'jest' | 'none';
 export type E2ETesting = 'playwright' | 'cypress' | 'none';
 export type VisualTesting = 'storybook' | 'chromatic' | 'none';
 export type Linting = 'eslint' | 'biome';

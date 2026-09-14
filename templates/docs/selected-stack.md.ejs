@@ -16,6 +16,10 @@ Webpack is configured in `webpack.config.js` with Babel (or TS pipeline), HtmlWe
 Rsbuild is the React-oriented toolchain built on Rspack. It ships JSX/TS, Fast Refresh, HTML, CSS/PostCSS, and sensible defaults out of the box. Config lives in `rsbuild.config.<%= ext %>`.
 
 **Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:3000
+<% } else if (buildTool === 'parcel') { -%>
+Parcel 2 needs almost no config — entry is `index.html`, aliases/`targets` live in `package.json`, and TypeScript/JSX/CSS work out of the box. Do **not** put `source`/`targets` in `.parcelrc` (that file is only for plugins).
+
+**Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:5173
 <% } else { -%>
 Your bundler is wired with scripts in `package.json`. Prefer keeping config minimal; add plugins only when needed.
 <% } -%>

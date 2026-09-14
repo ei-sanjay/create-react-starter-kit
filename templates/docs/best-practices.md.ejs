@@ -46,13 +46,11 @@ chore(deps): bump testing-library
 ## Testing strategy
 
 <% if (unitTesting === 'vitest' || unitTesting === 'jest') { -%>
-- Unit/integration with **<%= stackLabels.unitTesting %>** + Testing Library for components.
+- Unit/integration with **<%= stackLabels.unitTesting %>** for components and feature behavior.
 - Prefer `getByRole` / label text over test IDs.
 - Mock network at the domain boundary (`services/api` or RTK endpoints), not inside random UI helpers.
-<% } else if (unitTesting === 'rtl') { -%>
-- React Testing Library is installed — pair it with a runner of your choice.
 <% } else { -%>
-- Unit testing was skipped; add a runner before your first production release.
+- Unit testing was skipped; add a runner (Vitest or Jest) + React Testing Library before your first production release.
 <% } -%>
 <% if (e2eTesting !== 'none') { -%>
 - E2E with **<%= stackLabels.e2eTesting %>** for critical user journeys (load home, submit form).

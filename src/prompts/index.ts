@@ -170,9 +170,8 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       name: 'unitTesting',
       message: 'Unit Testing?',
       choices: [
-        { name: 'Vitest', value: 'vitest' },
-        { name: 'Jest', value: 'jest' },
-        { name: 'React Testing Library (RTL) only', value: 'rtl' },
+        { name: 'Vitest + React Testing Library', value: 'vitest' },
+        { name: 'Jest + React Testing Library', value: 'jest' },
         { name: 'None', value: 'none' },
       ],
       default: 'vitest',

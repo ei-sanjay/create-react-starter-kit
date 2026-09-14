@@ -91,9 +91,8 @@ function labelMap(): Record<string, Record<string, string>> {
       none: 'None',
     },
     unitTesting: {
-      vitest: 'Vitest',
-      jest: 'Jest',
-      rtl: 'React Testing Library',
+      vitest: 'Vitest + React Testing Library',
+      jest: 'Jest + React Testing Library',
       none: 'None',
     },
     e2eTesting: {
@@ -336,8 +335,22 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
   }
 
   if (answers.buildTool === 'parcel') {
+    // Parcel 2 reads these from package.json (not .parcelrc).
+    // Bare `"@"` is invalid for Parcel's alias schema; use a glob instead.
+    pkg.source = 'index.html';
+    pkg.targets = {
+      default: {
+        distDir: './dist',
+        context: 'browser',
+      },
+    };
+    pkg.browserslist = ['> 0.5%', 'last 2 versions', 'not dead'];
     pkg.alias = {
-      '@': './src',
+      '@/*': './src/$1',
+    };
+    // Required for react-router v7 package exports (and modern deps).
+    pkg['@parcel/resolver-default'] = {
+      packageExports: true,
     };
   }
 
