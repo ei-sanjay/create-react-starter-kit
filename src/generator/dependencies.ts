@@ -48,28 +48,15 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
         devDependencies['sass-loader'] = '^16.0.5';
       }
       break;
-    case 'rspack':
-      devDependencies['@rspack/core'] = '^1.2.8';
-      devDependencies['@rspack/cli'] = '^1.2.8';
-      devDependencies['@rspack/plugin-react-refresh'] = '^1.0.1';
-      devDependencies['html-rspack-plugin'] = '^6.0.2';
+    case 'rsbuild':
+      devDependencies['@rsbuild/core'] = '^1.3.22';
+      devDependencies['@rsbuild/plugin-react'] = '^1.3.1';
+      if (answers.styling === 'sass') {
+        devDependencies['@rsbuild/plugin-sass'] = '^1.3.1';
+      }
       break;
     case 'parcel':
       devDependencies['parcel'] = '^2.14.1';
-      break;
-    case 'esbuild':
-      devDependencies['esbuild'] = '^0.25.1';
-      break;
-    case 'rollup':
-      devDependencies['rollup'] = '^4.35.0';
-      devDependencies['@rollup/plugin-node-resolve'] = '^16.0.1';
-      devDependencies['@rollup/plugin-commonjs'] = '^28.0.3';
-      devDependencies['@rollup/plugin-replace'] = '^6.0.2';
-      devDependencies['@rollup/plugin-alias'] = '^5.1.1';
-      if (isTs) {
-        devDependencies['@rollup/plugin-typescript'] = '^12.1.2';
-      }
-      devDependencies['rollup-plugin-postcss'] = '^4.0.2';
       break;
   }
 
@@ -245,7 +232,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       devDependencies['storybook'] = '^8.6.4';
       devDependencies['@storybook/react'] = '^8.6.4';
       devDependencies['@storybook/addon-essentials'] = '^8.6.4';
-      if (answers.buildTool === 'vite' || answers.buildTool === 'esbuild') {
+      if (answers.buildTool === 'vite') {
         devDependencies['@storybook/react-vite'] = '^8.6.4';
       } else {
         devDependencies['@storybook/react-webpack5'] = '^8.6.4';
@@ -331,21 +318,14 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
       scripts.build = 'webpack --mode production';
       scripts.preview = 'webpack serve --mode production --open';
       break;
-    case 'rspack':
-      scripts.dev = 'rspack serve';
-      scripts.build = 'rspack build';
+    case 'rsbuild':
+      scripts.dev = 'rsbuild dev';
+      scripts.build = 'rsbuild build';
+      scripts.preview = 'rsbuild preview';
       break;
     case 'parcel':
       scripts.dev = 'parcel index.html';
       scripts.build = 'parcel build index.html';
-      break;
-    case 'esbuild':
-      scripts.dev = `node scripts/esbuild.dev.mjs`;
-      scripts.build = `node scripts/esbuild.build.mjs`;
-      break;
-    case 'rollup':
-      scripts.dev = 'rollup -c -w';
-      scripts.build = 'rollup -c';
       break;
   }
 

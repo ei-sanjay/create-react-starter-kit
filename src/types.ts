@@ -1,4 +1,4 @@
-export type BuildTool = 'vite' | 'webpack' | 'rspack' | 'parcel' | 'esbuild' | 'rollup';
+export type BuildTool = 'vite' | 'webpack' | 'rsbuild' | 'parcel';
 export type Language = 'javascript' | 'typescript';
 export type Router = 'react-router' | 'tanstack-router';
 export type StateManagement = 'redux' | 'zustand' | 'jotai' | 'context' | 'none';

@@ -12,9 +12,7 @@
     <script type="module" src="/src/main.<%= jsxExt %>"></script>
 <% } else if (buildTool === 'parcel') { -%>
     <script type="module" src="./src/main.<%= jsxExt %>"></script>
-<% } else if (buildTool === 'esbuild' || buildTool === 'rollup') { -%>
-    <script type="module" src="/dist/main.js"></script>
 <% } -%>
-<%# webpack/rspack: HtmlWebpackPlugin injects the bundle — no manual script tag %>
+<%# webpack/rsbuild: the bundler injects the script tag — no manual entry script %>
   </body>
 </html>

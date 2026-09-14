@@ -9,6 +9,7 @@ build/
 .cache/
 .parcel-cache/
 .rspack-profile-*/
+.rsbuild/
 
 # Env
 .env

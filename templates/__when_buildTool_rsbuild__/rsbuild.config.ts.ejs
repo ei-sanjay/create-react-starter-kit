@@ -1,0 +1,39 @@
+import { defineConfig, loadEnv } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+<% if (styling === 'sass') { -%>
+import { pluginSass } from '@rsbuild/plugin-sass';
+<% } -%>
+
+// Keep VITE_* vars working with the same env.ts / monitoring helpers used across stacks.
+const { publicVars } = loadEnv({ prefixes: ['VITE_', 'PUBLIC_'] });
+
+/**
+ * Rsbuild sits on top of Rspack and provides React-ready defaults
+ * (JSX transform, Fast Refresh, HTML generation, CSS/PostCSS, etc.).
+ */
+export default defineConfig({
+  plugins: [
+    pluginReact(),
+<% if (styling === 'sass') { -%>
+    pluginSass(),
+<% } -%>
+  ],
+  source: {
+    entry: {
+      index: './src/main.<%= jsxExt %>',
+    },
+    define: publicVars,
+  },
+  resolve: {
+    alias: {
+      '@': './src',
+    },
+  },
+  html: {
+    template: './index.html',
+    title: '<%= projectName %>',
+  },
+  server: {
+    port: 3000,
+  },
+});

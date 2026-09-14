@@ -12,6 +12,10 @@ Vite gives fast HMR and a Rollup-based production build. Config lives in `vite.c
 Webpack is configured in `webpack.config.js` with Babel (or TS pipeline), HtmlWebpackPlugin, and a dev server.
 
 **Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:3000
+<% } else if (buildTool === 'rsbuild') { -%>
+Rsbuild is the React-oriented toolchain built on Rspack. It ships JSX/TS, Fast Refresh, HTML, CSS/PostCSS, and sensible defaults out of the box. Config lives in `rsbuild.config.<%= ext %>`.
+
+**Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:3000
 <% } else { -%>
 Your bundler is wired with scripts in `package.json`. Prefer keeping config minimal; add plugins only when needed.
 <% } -%>

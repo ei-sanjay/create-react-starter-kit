@@ -8,6 +8,7 @@ out/
 .cache/
 .parcel-cache/
 .rspack-profile-*/
+.rsbuild/
 storybook-static/
 coverage/
 playwright-report/

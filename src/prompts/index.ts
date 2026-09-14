@@ -58,10 +58,8 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       choices: [
         { name: 'Vite', value: 'vite' },
         { name: 'Webpack', value: 'webpack' },
-        { name: 'Rspack', value: 'rspack' },
+        { name: 'Rsbuild', value: 'rsbuild' },
         { name: 'Parcel', value: 'parcel' },
-        { name: 'esbuild', value: 'esbuild' },
-        { name: 'Rollup', value: 'rollup' },
       ],
       default: 'vite',
     },

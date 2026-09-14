@@ -29,7 +29,7 @@
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:ui
 ```
 
-E2E base URL: `http://127.0.0.1:<%= buildTool === 'webpack' ? 3000 : 5173 %>`
+E2E base URL: `http://127.0.0.1:<%= buildTool === 'webpack' || buildTool === 'rsbuild' ? 3000 : 5173 %>`
 <% } else if (e2eTesting === 'cypress') { -%>
 ```bash
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e

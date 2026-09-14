@@ -39,10 +39,8 @@ function labelMap(): Record<string, Record<string, string>> {
     buildTool: {
       vite: 'Vite',
       webpack: 'Webpack',
-      rspack: 'Rspack',
+      rsbuild: 'Rsbuild',
       parcel: 'Parcel',
-      esbuild: 'esbuild',
-      rollup: 'Rollup',
     },
     language: {
       javascript: 'JavaScript',
@@ -254,6 +252,10 @@ function resolveOutputPath(
 
   // Vitest lives in vite.config for Vite; emit standalone config otherwise
   if (out === 'vitest.config.ts' && answers.buildTool === 'vite') {
+    return '';
+  }
+
+  if (out === 'rsbuild.config.ts' && answers.buildTool !== 'rsbuild') {
     return '';
   }
 

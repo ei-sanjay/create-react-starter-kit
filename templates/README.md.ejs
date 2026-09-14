@@ -45,7 +45,7 @@ npm run dev
 <% } -%>
 ```
 
-Open the URL printed in the terminal (typically `http://localhost:<%= buildTool === 'webpack' ? 3000 : 5173 %>`).
+Open the URL printed in the terminal (typically `http://localhost:<%= buildTool === 'webpack' || buildTool === 'rsbuild' ? 3000 : 5173 %>`).
 
 ## Environment setup
 
