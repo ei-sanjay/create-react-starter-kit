@@ -4,6 +4,14 @@
 <% } -%>
   "testEnvironment": "jsdom",
   "setupFilesAfterEnv": ["<rootDir>/tests/setup.<%= ext %>"],
+  "testMatch": ["**/tests/**/*.test.[jt]s?(x)"],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/build/",
+    "/tests/e2e/",
+    "/e2e/"
+  ],
   "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/src/$1",
     "\\\\.(css|scss)$": "<rootDir>/tests/styleMock.<%= ext %>"

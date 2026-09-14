@@ -205,6 +205,11 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       devDependencies['@testing-library/jest-dom'] = '^6.6.3';
       devDependencies['@testing-library/user-event'] = '^14.6.1';
       devDependencies['jsdom'] = '^26.0.0';
+      // Non-Vite build tools still need Vite + React plugin to transform tests
+      if (answers.buildTool !== 'vite') {
+        devDependencies['vite'] = '^6.2.2';
+        devDependencies['@vitejs/plugin-react'] = '^4.3.4';
+      }
       break;
     case 'jest':
       devDependencies['jest'] = '^29.7.0';

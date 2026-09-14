@@ -251,6 +251,11 @@ function resolveOutputPath(
     return '';
   }
 
+  // Vitest lives in vite.config for Vite; emit standalone config otherwise
+  if (out === 'vitest.config.ts' && answers.buildTool === 'vite') {
+    return '';
+  }
+
   if (
     out === 'src/styles/global.css' &&
     answers.styling === 'sass' &&

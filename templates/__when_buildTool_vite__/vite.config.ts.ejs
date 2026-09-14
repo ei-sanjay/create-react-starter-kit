@@ -28,7 +28,15 @@ export default mergeConfig(
       globals: true,
       environment: 'jsdom',
       setupFiles: './tests/setup.<%= ext %>',
-      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/*.e2e.*'],
+      include: ['tests/**/*.{test,spec}.{<%= isTypeScript ? 'ts,tsx' : 'js,jsx' %>}'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/tests/e2e/**',
+        '**/e2e/**',
+        '**/*.e2e.*',
+      ],
     },
   }),
 );

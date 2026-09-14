@@ -1,0 +1,31 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
+
+// Standalone Vitest config for non-Vite build tools (Webpack, Parcel, etc.).
+// Vite projects configure Vitest inside vite.config instead.
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(rootDir, 'src'),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './tests/setup.<%= ext %>',
+    include: ['tests/**/*.{test,spec}.{<%= isTypeScript ? 'ts,tsx' : 'js,jsx' %>}'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/tests/e2e/**',
+      '**/e2e/**',
+      '**/*.e2e.*',
+    ],
+  },
+});
