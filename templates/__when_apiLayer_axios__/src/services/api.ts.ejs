@@ -1,0 +1,23 @@
+import { apiGet, apiPost } from '@/services/http';
+<% if (isTypeScript) { -%>
+import type { FeedbackPayload, Post } from '@/types/models';
+<% } -%>
+
+/**
+ * Domain API methods — keep React components free of raw URLs and HTTP details.
+ * Call these from TanStack Query / SWR queryFns, or directly for simple mutations.
+ */
+export async function fetchPosts(signal<% if (isTypeScript) { %>?: AbortSignal<% } %>) {
+  return apiGet<% if (isTypeScript) { %><Post[]><% } %>('/posts?_limit=5', { signal });
+}
+
+export async function createFeedback(
+  payload<% if (isTypeScript) { %>: FeedbackPayload<% } %>,
+  signal<% if (isTypeScript) { %>?: AbortSignal<% } %>,
+) {
+  return apiPost('/posts', payload, { signal });
+}
+
+<% if (isTypeScript) { -%>
+export type { FeedbackPayload, Post } from '@/types/models';
+<% } -%>

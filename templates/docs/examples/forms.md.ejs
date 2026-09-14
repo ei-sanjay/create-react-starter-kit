@@ -3,16 +3,76 @@
 **Forms:** <%= stackLabels.forms %>
 **Validation:** <%= stackLabels.validation %>
 
-**Live demo:** Feedback form on `/`
+**Live demo:** `/feedback` → `src/features/feedback/FeedbackForm.<%= jsxExt %>`
+**Schemas:** `src/lib/validation.<%= ext %>`
 
 ## When to use
 
-Multi-field input with client-side rules and async submit.
+Multi-field input with client-side rules and async submit:
 
-## Best practice
+- contact / feedback forms
+- settings screens
+- multi-step wizards (add a stepper on top of the same schema)
 
-Define schemas once in `src/lib/validation.<%= ext %>` and reuse across UI and API boundaries.
+## How to use in this project
 
-## Snippet
+1. Define the schema once in `src/lib/validation.<%= ext %>`.
+2. Bind inputs with <%= stackLabels.forms %>.
+3. On submit, call the API layer:
+<% if (serverState === 'rtk-query') { -%>
+   - RTK mutation: `useCreateFeedbackMutation()` → `.unwrap()`
+<% } else { -%>
+   - `createFeedback()` from `@/services/api`
+<% } -%>
+4. Show success with `role="status"` and reset the form.
 
-See `src/features/feedback/FeedbackForm.<%= jsxExt %>`.
+<% if (forms === 'react-hook-form') { -%>
+### React Hook Form pattern
+
+```tsx
+const {
+  register,
+  handleSubmit,
+  formState: { errors, isSubmitting },
+} = useForm({
+  defaultValues,
+  resolver: zodResolver(feedbackSchema), // when using Zod
+});
+
+const onSubmit = handleSubmit(async (values) => {
+  await createFeedback(values);
+});
+```
+<% } else if (forms === 'formik') { -%>
+### Formik pattern
+
+Use `<Formik>` + `<Field>` and pass a Yup schema via `validationSchema` when selected.
+<% } else if (forms === 'tanstack-form') { -%>
+### TanStack Form pattern
+
+Create the form with `useForm`, validate with your schema inside `onSubmit`, and bind each field through `form.Field`.
+<% } else { -%>
+### Native form pattern
+
+Keep values in `useState`, run the schema/validator on submit, then call the API helper.
+<% } -%>
+
+## Best practices
+
+- **Single source of truth for rules** — schemas in `src/lib`, not duplicated `if` checks in JSX.
+- Validate **on submit** first; add on-blur validation when users need earlier feedback.
+- Map API validation errors (422) back onto fields when the backend returns field paths.
+- Disable the submit button while `isSubmitting` to prevent double posts.
+- Keep forms accessible: real `<label>`, `aria-invalid`, and visible error text.
+- Do not store form drafts in global client state unless the draft must survive across routes.
+
+## Testing tips
+
+- Assert validation messages for empty submit.
+- Mock the network boundary (API helper or RTK mutation) and assert the success status region.
+- Prefer `userEvent` over `fireEvent` for realistic typing.
+
+## Related
+
+- HTTP / RTK details: `docs/examples/api.md`
+- Live UI: `/feedback`

@@ -1,0 +1,195 @@
+import { env } from '@/config/env';
+import { ApiError, mapStatusToCode } from './errors';
+
+const REQUEST_ID_HEADER = 'X-Request-Id';
+const DEFAULT_TIMEOUT_MS = 15_000;
+
+<% if (isTypeScript) { -%>
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export interface RequestOptions extends Omit<RequestInit, 'method' | 'body'> {
+  method?: HttpMethod;
+  body?: unknown;
+  timeoutMs?: number;
+  /** Skip JSON Content-Type / body serialization when sending FormData, etc. */
+  rawBody?: boolean;
+}
+<% } -%>
+
+/**
+ * Swap this for your real auth storage (cookie, memory store, secure storage).
+ */
+function getAccessToken()<% if (isTypeScript) { %>: string | null<% } %> {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem('access_token');
+}
+
+function createRequestId()<% if (isTypeScript) { %>: string<% } %> {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `req_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+async function parseErrorBody(response<% if (isTypeScript) { %>: Response<% } %>)<% if (isTypeScript) { %>: Promise<unknown><% } %> {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) {
+    try {
+      return await response.json();
+    } catch {
+      return undefined;
+    }
+  }
+  try {
+    return await response.text();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Shared fetch wrapper with auth header, request IDs, timeout, and normalized errors.
+ * Prefer domain helpers in `services/api` over calling this from components.
+ */
+export async function request<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  options<% if (isTypeScript) { %>: RequestOptions = {}<% } else { %> = {}<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const {
+    method = 'GET',
+    body,
+    headers: initHeaders,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    rawBody = false,
+    signal: userSignal,
+    ...rest
+  } = options;
+
+  const requestId = createRequestId();
+  const headers = new Headers(initHeaders);
+  headers.set(REQUEST_ID_HEADER, requestId);
+  headers.set('Accept', 'application/json');
+
+  const token = getAccessToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  let payload<% if (isTypeScript) { %>: BodyInit | undefined<% } %>;
+  if (body !== undefined && body !== null) {
+    if (rawBody) {
+      payload = body<% if (isTypeScript) { %> as BodyInit<% } %>;
+    } else {
+      headers.set('Content-Type', 'application/json');
+      payload = JSON.stringify(body);
+    }
+  }
+
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  if (userSignal) {
+    if (userSignal.aborted) controller.abort();
+    else userSignal.addEventListener('abort', onAbort, { once: true });
+  }
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${env.apiBaseUrl}${path}`, {
+      ...rest,
+      method,
+      headers,
+      body: payload,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const details = await parseErrorBody(response);
+      const message =
+        details && typeof details === 'object' && 'message' in details && typeof details.message === 'string'
+          ? details.message
+          : `Request failed with status ${response.status}`;
+
+      const apiError = new ApiError({
+        message,
+        status: response.status,
+        code: mapStatusToCode(response.status),
+        details,
+        requestId,
+      });
+
+      if (apiError.isUnauthorized && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: apiError }));
+      }
+
+      throw apiError;
+    }
+
+    if (response.status === 204) {
+      return undefined<% if (isTypeScript) { %> as T<% } %>;
+    }
+
+    return (await response.json())<% if (isTypeScript) { %> as T<% } %>;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      const timedOut = !userSignal?.aborted;
+      throw new ApiError({
+        message: timedOut ? 'Request timed out. Please try again.' : 'Request was cancelled.',
+        code: timedOut ? 'TIMEOUT' : 'NETWORK',
+        requestId,
+        cause: error,
+      });
+    }
+
+    throw new ApiError({
+      message: error instanceof Error ? error.message : 'Network error. Check your connection and try again.',
+      code: 'NETWORK',
+      requestId,
+      cause: error,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+    userSignal?.removeEventListener('abort', onAbort);
+  }
+}
+
+export async function apiGet<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  options<% if (isTypeScript) { %>?: Omit<RequestOptions, 'method' | 'body'><% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, { ...options, method: 'GET' });
+}
+
+export async function apiPost<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: Omit<RequestOptions, 'method' | 'body'><% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, { ...options, method: 'POST', body });
+}
+
+export async function apiPut<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: Omit<RequestOptions, 'method' | 'body'><% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, { ...options, method: 'PUT', body });
+}
+
+export async function apiPatch<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: Omit<RequestOptions, 'method' | 'body'><% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, { ...options, method: 'PATCH', body });
+}
+
+export async function apiDelete<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  options<% if (isTypeScript) { %>?: Omit<RequestOptions, 'method' | 'body'><% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  return request<% if (isTypeScript) { %><T><% } %>(path, { ...options, method: 'DELETE' });
+}
+
+export { ApiError };

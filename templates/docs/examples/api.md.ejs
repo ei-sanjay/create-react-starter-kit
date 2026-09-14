@@ -2,16 +2,173 @@
 
 **Choice:** <%= stackLabels.apiLayer %>
 
-## When to use
+<% if (apiLayer === 'none') { -%>
+## Why there is no Axios/Fetch client
 
-All HTTP traffic should go through a single module for base URL, headers, and error logging.
+You selected **RTK Query**, which already provides:
 
-## Best practice
+- a shared base query (`fetchBaseQuery`)
+- caching, deduplication, and generated hooks
+- a single place for headers via `prepareHeaders`
 
-- Type responses at the boundary.
-- Surface user-friendly errors in UI; log technical details to monitoring.
-- Do not scatter `fetch`/`axios` calls across components.
+Adding Axios/Fetch beside RTK Query usually creates **two HTTP stacks**, duplicated auth logic, and inconsistent error handling.
 
-## Snippet
+**Where HTTP lives:** `src/store/postsApi.<%= ext %>`
 
-`src/services/api.<%= ext %>` — `apiGet`, `apiPost`, `fetchPosts`, `createFeedback`.
+### Extending RTK Query
+
+```ts
+// add to endpoints
+getPostById: builder.query({
+  query: (id) => `/posts/${id}`,
+  providesTags: (_result, _error, id) => [{ type: 'Posts', id }],
+}),
+```
+
+### Auth header pattern
+
+```ts
+prepareHeaders: (headers) => {
+  const token = localStorage.getItem('access_token');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  return headers;
+},
+```
+
+### When you might still add Axios/Fetch later
+
+- Uploading to a third-party host that RTK should not cache
+- Streaming / non-JSON APIs
+- A legacy SDK that must use its own client
+
+If that happens, isolate it under `src/services/` and keep RTK as the default for app REST resources.
+
+See `docs/examples/data-fetching.md` for UI usage.
+<% } else if (apiLayer === 'axios') { -%>
+## Layout
+
+```text
+src/services/
+  http/
+    client.<%= ext %>   # axios instance + interceptors
+    errors.<%= ext %>   # ApiError normalization
+    index.<%= ext %>    # public exports
+  api.<%= ext %>        # domain methods (fetchPosts, createFeedback)
+```
+
+## How to use
+
+### From a query library
+
+```ts
+import { fetchPosts, createFeedback } from '@/services/api';
+
+// TanStack Query
+queryFn: ({ signal }) => fetchPosts(signal)
+
+// mutation
+await createFeedback({ name, email, message })
+```
+
+### Direct low-level calls (rare)
+
+```ts
+import { apiGet, apiPost, ApiError } from '@/services/http';
+
+try {
+  const post = await apiGet(`/posts/${id}`);
+} catch (error) {
+  if (error instanceof ApiError && error.isUnauthorized) {
+    // redirect to login / refresh token
+  }
+}
+```
+
+## What the Axios setup includes
+
+| Concern | Implementation |
+|---------|----------------|
+| Base URL | `env.apiBaseUrl` |
+| Timeout | 15s |
+| Auth | `Authorization: Bearer <token>` from `localStorage.access_token` |
+| Request tracing | `X-Request-Id` on every request |
+| Errors | Normalized `ApiError` with `status`, `code`, `requestId` |
+| 401 handling | Dispatches `auth:unauthorized` browser event |
+| Verbs | `apiGet` / `apiPost` / `apiPut` / `apiPatch` / `apiDelete` |
+| Cancellation | Pass `{ signal }` from AbortController / query libs |
+
+## Best practices
+
+- **Components never import axios.** Use domain helpers or at least `@/services/http`.
+- Keep token reads inside the HTTP layer (`getAccessToken`), not in every feature.
+- Listen once for `auth:unauthorized` near the app shell to centralize logout/redirect.
+- Type responses at the boundary (`apiGet<Post[]>`).
+- Log technical details; show user-friendly messages in UI.
+- Prefer adding methods to `api.<%= ext %>` over spreading URLs across features.
+
+## Extending with a refresh-token flow
+
+1. Detect `ApiError.isUnauthorized` in the response interceptor.
+2. Queue in-flight requests while refreshing.
+3. Retry the original request with the new access token.
+4. Fail the queue and redirect if refresh fails.
+
+Keep that logic in `http/client.<%= ext %>` so features stay unaware.
+
+## Example: add a new domain method
+
+```ts
+// src/services/api.ts
+export async function fetchPost(id: number, signal?: AbortSignal) {
+  return apiGet<Post>(`/posts/${id}`, { signal });
+}
+```
+<% } else { -%>
+## Layout
+
+```text
+src/services/
+  http/
+    client.<%= ext %>   # fetch wrapper + timeout/auth/errors
+    errors.<%= ext %>   # ApiError normalization
+    index.<%= ext %>
+  api.<%= ext %>        # domain methods
+```
+
+## How to use
+
+```ts
+import { fetchPosts, createFeedback } from '@/services/api';
+import { apiGet, ApiError } from '@/services/http';
+
+await fetchPosts(signal);
+await createFeedback(payload);
+
+try {
+  await apiGet('/posts/1');
+} catch (error) {
+  if (error instanceof ApiError && error.isRetryable) {
+    // show retry UI
+  }
+}
+```
+
+## What the Fetch setup includes
+
+| Concern | Implementation |
+|---------|----------------|
+| Base URL | `env.apiBaseUrl` |
+| Timeout | AbortController (15s default) |
+| Auth | Bearer token from `localStorage.access_token` |
+| Request tracing | `X-Request-Id` |
+| Errors | Normalized `ApiError` |
+| 401 handling | `auth:unauthorized` event |
+| Verbs | get/post/put/patch/delete helpers |
+
+## Best practices
+
+- Prefer domain helpers over raw `request()` in components.
+- Pass `signal` from TanStack Query / user cancellation.
+- Keep JSON as the default; use `rawBody: true` for `FormData` uploads.
+- Centralize auth and error mapping — do not re-implement per feature.
+<% } -%>

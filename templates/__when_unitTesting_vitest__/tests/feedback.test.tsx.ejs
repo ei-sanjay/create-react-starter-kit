@@ -4,6 +4,19 @@ import userEvent from '@testing-library/user-event';
 import { FeedbackForm } from '@/features/feedback/FeedbackForm';
 import { renderWithProviders } from './test-utils';
 
+<% if (serverState === 'rtk-query') { -%>
+const createFeedback = vi.fn(() => ({
+  unwrap: vi.fn(async () => ({ id: 101 })),
+}));
+
+vi.mock('@/store/postsApi', async (importOriginal) => {
+  const actual = await importOriginal<% if (isTypeScript) { %><typeof import('@/store/postsApi')><% } %>();
+  return {
+    ...actual,
+    useCreateFeedbackMutation: () => [createFeedback, { isLoading: false }],
+  };
+});
+<% } else { -%>
 vi.mock('@/services/api', async (importOriginal) => {
   const actual = await importOriginal<% if (isTypeScript) { %><typeof import('@/services/api')><% } %>();
   return {
@@ -11,6 +24,7 @@ vi.mock('@/services/api', async (importOriginal) => {
     createFeedback: vi.fn(async () => ({ id: 101 })),
   };
 });
+<% } -%>
 
 describe('FeedbackForm', () => {
   beforeEach(() => {
@@ -30,7 +44,9 @@ describe('FeedbackForm', () => {
 
   it('submits valid feedback and shows success status', async () => {
     const user = userEvent.setup();
+<% if (serverState !== 'rtk-query') { -%>
     const { createFeedback } = await import('@/services/api');
+<% } -%>
     renderWithProviders(<FeedbackForm />);
 
     await user.type(screen.getByPlaceholderText('Ada Lovelace'), 'Ada Lovelace');

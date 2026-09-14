@@ -7,8 +7,13 @@ export function PostsPage() {
         <p className="eyebrow">Server state</p>
         <h1>Posts</h1>
         <p className="lede">
-          Fetches sample posts via <strong><%= stackLabels.serverState === 'None' ? stackLabels.apiLayer : stackLabels.serverState %></strong>{' '}
-          and <strong><%= stackLabels.apiLayer %></strong>.
+          Fetches sample posts via <strong><%= stackLabels.serverState === 'None' ? stackLabels.apiLayer : stackLabels.serverState %></strong>
+<% if (apiLayer !== 'none' && serverState !== 'rtk-query') { -%>
+          {' '}and <strong><%= stackLabels.apiLayer %></strong>
+<% } else if (serverState === 'rtk-query') { -%>
+          {' '}(HTTP via <code>fetchBaseQuery</code>)
+<% } -%>
+          .
         </p>
       </header>
       <PostsPanel />

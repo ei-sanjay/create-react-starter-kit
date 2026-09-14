@@ -21,52 +21,71 @@ You selected a coherent default-friendly stack during scaffolding. The generator
 
 ```text
 src/
-  main.<%= jsxExt %>    # bootstrap + render
-  providers.<%= jsxExt %>
-  App.<%= jsxExt %>     # route tree
+  main.<%= jsxExt %>       # bootstrap + render
+  providers.<%= jsxExt %>  # global providers (store, query, theme)
+  App.<%= jsxExt %>        # route tree
   assets/
-  components/         # shared UI (layout/, ui/)
-  config/
-  features/           # domain modules
+  components/            # shared UI (layout/, ui/)
+  config/                # env + app config
+  features/              # domain modules (counter, posts, feedback)
   hooks/
-  lib/
-  routes/             # / /counter /posts /feedback /about
-  services/
-  store/
+  lib/                   # validation, monitoring helpers
+  routes/                # page-level route components
+  services/              # HTTP client + domain API (when selected)
+  store/                 # client state + RTK Query APIs (when selected)
   styles/
-  types/
+  types/                 # shared domain models
   utils/
 ```
 
 **Rules of thumb**
 
 - Put new product work in `src/features/<domain>/`.
-- Keep `components/` dumb and reusable.
+- Keep `components/` presentational and reusable.
 - Import with the `@/` alias.
 - Prefer a feature's public surface over deep cross-feature imports.
+- Keep providers thin — wiring belongs in `providers.<%= jsxExt %>`, business logic does not.
 
 ## Routes
 
-| Path | Purpose |
-|------|---------|
-| `/` | Home overview |
-| `/counter` | Client state demo |
-| `/posts` | Server state / data fetching |
-| `/feedback` | Forms + validation |
-| `/about` | Orientation |
+| Path | Purpose | Primary demo |
+|------|---------|--------------|
+| `/` | Home overview | Stack orientation |
+| `/counter` | Client state | <%= stackLabels.stateManagement %> |
+| `/posts` | Server state | <%= stackLabels.serverState %> |
+| `/feedback` | Forms + validation | <%= stackLabels.forms %> |
+| `/about` | Orientation | Architecture notes |
 
 ## Path aliases
 
-`@/*` maps to `src/*` in TypeScript/JS config and in your bundler.
+`@/*` maps to `src/*` in TypeScript/JS config and in your bundler. Prefer `@/features/...` over long relative paths.
 
 ## Runtime composition
 
-`src/main.<%= jsxExt %>` → `AppProviders` → `App` (router) → layout → pages.
+```text
+main → AppProviders → App (router) → layout → page → feature panels
+```
 
-Providers are ordered: client state → server cache → UI theme.
+Provider order matters: client store → server cache → UI theme.
 
 ## Boundaries
 
-- **UI** should call HTTP through `services/`.
-- **Schemas** live in `lib/validation`.
-- **Env access** stays in `config/`, `services/`, and `lib/monitoring`.
+<% if (serverState === 'rtk-query') { -%>
+- **HTTP** for remote resources lives in RTK Query APIs (`src/store/*Api.<%= ext %>`), not in components.
+- Use `fetchBaseQuery` + `prepareHeaders` for auth, base URL, and shared headers.
+- Do **not** add a parallel Axios/Fetch client unless you have a clear non-RTK integration (uploads to a different host, third-party SDK, etc.).
+<% } else { -%>
+- **UI** should call domain helpers in `src/services/api.<%= ext %>`.
+- **Transport** details (interceptors, tokens, timeouts) stay in `src/services/http/`.
+- Components should not call `axios` / `fetch` directly.
+<% } -%>
+- **Schemas** live in `lib/validation` and are reused by forms and API payloads.
+- **Env access** stays in `config/`, services/store, and `lib/monitoring`.
+- **Client state** holds UI/ephemeral state; **server state** caches remote entities.
+
+## Scaling tips
+
+1. Split large features into `components/`, `hooks/`, and `api/` subfolders inside the feature.
+2. Promote shared types into `src/types/` once two features need them.
+3. Keep route files thin — they compose features, they should not own data logic.
+4. Prefer explicit query keys / endpoint names over anonymous fetch calls.

@@ -2,9 +2,24 @@
 
 ## Code organization
 
-- Colocate tests next to units or under `tests/` for cross-cutting suites.
+- Colocate feature UI, hooks, and tests under `src/features/<domain>/`.
 - Prefer small modules with clear exports over “utils dump” files.
 - Name features after domains (`billing`, `auth`), not technical junk drawers.
+- Keep route files as composers — they should not own fetching or form schemas.
+
+## HTTP & data
+
+<% if (serverState === 'rtk-query') { -%>
+- Define one API slice per domain (or a carefully shared base API).
+- Use `tagTypes` for cache invalidation instead of manual refetches when possible.
+- Put auth in `prepareHeaders`.
+- Prefer generated hooks in components; avoid dispatching raw endpoint actions unless needed.
+<% } else { -%>
+- Never call `axios` / `fetch` from React components — use `src/services/api.<%= ext %>`.
+- Keep interceptors and error normalization in `src/services/http/`.
+- Pass `AbortSignal` from query libraries into HTTP helpers.
+<% } -%>
+- Treat server cache and client UI state as separate concerns.
 
 ## Linting & formatting
 
@@ -13,16 +28,27 @@
 - Husky + lint-staged formats staged files so diffs stay clean.
 - commitlint enforces Conventional Commits on `git commit`.
 
+**Commit style examples**
+
+```text
+feat(posts): add pagination to posts query
+fix(feedback): surface API validation errors
+chore(deps): bump testing-library
+```
+
 ## Environment variables
 
 - Never commit `.env`.
-- Prefix client-visible vars for your bundler.
+- Prefix client-visible vars for your bundler (`VITE_*`).
 - Validate required env at boot for production deploys.
+- Document every variable in `.env.example` with a one-line purpose.
 
 ## Testing strategy
 
 <% if (unitTesting === 'vitest' || unitTesting === 'jest') { -%>
 - Unit/integration with **<%= stackLabels.unitTesting %>** + Testing Library for components.
+- Prefer `getByRole` / label text over test IDs.
+- Mock network at the domain boundary (`services/api` or RTK endpoints), not inside random UI helpers.
 <% } else if (unitTesting === 'rtl') { -%>
 - React Testing Library is installed — pair it with a runner of your choice.
 <% } else { -%>
@@ -30,19 +56,27 @@
 <% } -%>
 <% if (e2eTesting !== 'none') { -%>
 - E2E with **<%= stackLabels.e2eTesting %>** for critical user journeys (load home, submit form).
+- Keep e2e thin: happy paths + one failure path per critical flow.
 <% } -%>
 <% if (visualTesting === 'storybook') { -%>
 - Storybook for isolated UI development and visual review.
+- Write stories for states (loading, empty, error, success), not only the happy path.
 <% } else if (visualTesting === 'chromatic') { -%>
 - Chromatic for visual regression against baselines.
 <% } -%>
 
 Aim for: fast unit tests on logic, fewer integration tests on features, thin e2e on happy paths.
 
+## Accessibility
+
+- Prefer semantic HTML (`button`, `label`, `nav`) before ARIA.
+- Ensure keyboard focus order matches visual order.
+- Pair every input with a visible label; surface errors with `aria-live` / `role="status"` where appropriate.
+
 ## Deployment notes
 
 1. `<%= packageManager === 'npm' ? 'npm run' : packageManager %> build`
-2. Serve `dist/` (or your bundler's output) behind HTTPS.
+2. Serve the bundler output (`dist/` / `build/`) behind HTTPS.
 3. Configure SPA fallback to `index.html` for client routes.
 4. Inject production env vars in the host (Vercel, Netlify, Cloudflare, nginx, etc.).
 5. Enable error tracking DSN in production only.
@@ -54,3 +88,5 @@ Aim for: fast unit tests on logic, fewer integration tests on features, thin e2e
 - [ ] Bundle analyzed for accidental secrets
 - [ ] Monitoring verified with a test event
 - [ ] Accessibility pass on primary flows
+- [ ] Error states designed for `/posts` and `/feedback`
+- [ ] Auth expiry path handled (401 → re-login / token refresh)

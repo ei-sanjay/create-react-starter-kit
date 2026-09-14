@@ -1,0 +1,5 @@
+export { request, apiGet, apiPost, apiPut, apiPatch, apiDelete, ApiError } from './client';
+<% if (isTypeScript) { -%>
+export type { ApiErrorCode } from './errors';
+export type { HttpMethod, RequestOptions } from './client';
+<% } -%>

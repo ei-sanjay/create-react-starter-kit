@@ -1,0 +1,81 @@
+<% if (isTypeScript) { -%>
+export type ApiErrorCode =
+  | 'NETWORK'
+  | 'TIMEOUT'
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'NOT_FOUND'
+  | 'VALIDATION'
+  | 'SERVER'
+  | 'UNKNOWN';
+
+export class ApiError extends Error {
+  readonly status?: number;
+  readonly code: ApiErrorCode;
+  readonly details?: unknown;
+  readonly requestId?: string;
+
+  constructor(options: {
+    message: string;
+    status?: number;
+    code?: ApiErrorCode;
+    details?: unknown;
+    requestId?: string;
+    cause?: unknown;
+  }) {
+    super(options.message, options.cause ? { cause: options.cause } : undefined);
+    this.name = 'ApiError';
+    this.status = options.status;
+    this.code = options.code ?? 'UNKNOWN';
+    this.details = options.details;
+    this.requestId = options.requestId;
+  }
+
+  get isUnauthorized() {
+    return this.status === 401 || this.code === 'UNAUTHORIZED';
+  }
+
+  get isRetryable() {
+    return this.code === 'NETWORK' || this.code === 'TIMEOUT' || this.code === 'SERVER';
+  }
+}
+
+export function mapStatusToCode(status?: number): ApiErrorCode {
+  if (!status) return 'NETWORK';
+  if (status === 401) return 'UNAUTHORIZED';
+  if (status === 403) return 'FORBIDDEN';
+  if (status === 404) return 'NOT_FOUND';
+  if (status === 422 || status === 400) return 'VALIDATION';
+  if (status >= 500) return 'SERVER';
+  return 'UNKNOWN';
+}
+<% } else { -%>
+export class ApiError extends Error {
+  constructor(options) {
+    super(options.message, options.cause ? { cause: options.cause } : undefined);
+    this.name = 'ApiError';
+    this.status = options.status;
+    this.code = options.code ?? 'UNKNOWN';
+    this.details = options.details;
+    this.requestId = options.requestId;
+  }
+
+  get isUnauthorized() {
+    return this.status === 401 || this.code === 'UNAUTHORIZED';
+  }
+
+  get isRetryable() {
+    return this.code === 'NETWORK' || this.code === 'TIMEOUT' || this.code === 'SERVER';
+  }
+}
+
+export function mapStatusToCode(status) {
+  if (!status) return 'NETWORK';
+  if (status === 401) return 'UNAUTHORIZED';
+  if (status === 403) return 'FORBIDDEN';
+  if (status === 404) return 'NOT_FOUND';
+  if (status === 422 || status === 400) return 'VALIDATION';
+  if (status >= 500) return 'SERVER';
+  return 'UNKNOWN';
+}
+<% } -%>

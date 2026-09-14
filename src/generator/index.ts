@@ -119,6 +119,7 @@ function labelMap(): Record<string, Record<string, string>> {
     apiLayer: {
       axios: 'REST via Axios',
       fetch: 'REST via Fetch',
+      none: 'RTK Query (fetchBaseQuery)',
     },
     packageManager: {
       pnpm: 'pnpm',

@@ -32,7 +32,11 @@ import { validateFeedback<% if (isTypeScript) { %>, type FeedbackValues<% } %> }
 import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
 <% } -%>
 <% } -%>
+<% if (serverState === 'rtk-query') { -%>
+import { useCreateFeedbackMutation } from '@/store/postsApi';
+<% } else { -%>
 import { createFeedback } from '@/services/api';
+<% } -%>
 import { UiButton } from '@/components/ui/UiButton';
 
 const defaults<% if (isTypeScript) { %>: FeedbackValues<% } %> = {
@@ -43,6 +47,12 @@ const defaults<% if (isTypeScript) { %>: FeedbackValues<% } %> = {
 
 export function FeedbackForm() {
   const [status, setStatus] = useState<% if (isTypeScript) { %><string | null><% } %>(null);
+<% if (serverState === 'rtk-query') { -%>
+  const [createFeedbackMutation] = useCreateFeedbackMutation();
+  const createFeedback = async (values<% if (isTypeScript) { %>: FeedbackValues<% } %>) => {
+    await createFeedbackMutation(values).unwrap();
+  };
+<% } -%>
 
 <% if (forms === 'react-hook-form') { -%>
   const {

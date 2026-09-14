@@ -5,19 +5,67 @@
 
 ## When to use
 
-Establish design tokens early; use a component library for complex accessible primitives.
+Establish design tokens early; use a component library for complex accessible primitives (dialogs, menus, focus traps).
 
-## Best practice
+## How to use in this project
 
-<% if (uiLibrary === 'shadcn') { -%>
-Treat shadcn-style primitives as owned source — customize freely, keep `cn()` helpers consistent.
-<% } else if (uiLibrary === 'none') { -%>
-Invest in a small set of shared primitives (`UiButton`, layout) before adding a full kit.
+| Piece | Location |
+|-------|----------|
+| Global styles / tokens | `src/styles/global.<%= styling === 'sass' && uiLibrary !== 'shadcn' ? 'scss' : 'css' %>` |
+| Button adapter | `src/components/ui/UiButton.<%= jsxExt %>` |
+| Layout chrome | `src/components/layout/` |
+
+<% if (styling === 'tailwind') { -%>
+### Tailwind
+
+Utility classes are available across the app. Prefer composing utilities in components over one-off CSS files unless the rule is truly global.
+
+```tsx
+<button className="rounded-md bg-slate-900 px-3 py-2 text-white hover:bg-slate-800">
+  Save
+</button>
+```
+
+**Best practices**
+
+- Extract repeated class clusters into small components (`UiButton`) instead of giant `className` strings everywhere.
+- Keep design tokens (colors, spacing) consistent; avoid magic hex values in features.
+<% } else if (styling === 'css-modules') { -%>
+### CSS Modules
+
+Colocate `*.module.css` next to the component. Import the `styles` object and reference `styles.root`.
+<% } else if (styling === 'styled-components') { -%>
+### Styled Components
+
+Create styled primitives next to the component. Prefer transient props (`$active`) so DOM attributes stay clean.
 <% } else { -%>
-Wrap third-party components in thin adapters (`UiButton`) so swapping kits later is cheaper.
+### Sass/SCSS
+
+Shared variables/mixins belong under `src/styles/`. Feature-specific partials can live next to the feature.
 <% } -%>
 
-## Snippet
+<% if (uiLibrary === 'shadcn') { -%>
+## shadcn/ui notes
 
-Global styles: `src/styles/global.<%= styling === 'sass' && uiLibrary !== 'shadcn' ? 'scss' : 'css' %>`
-Button adapter: `src/components/ui/UiButton.<%= jsxExt %>`
+Treat shadcn-style primitives as **owned source** — customize freely, keep `cn()` helpers consistent, and avoid patching node_modules.
+<% } else if (uiLibrary === 'none') { -%>
+## No UI kit
+
+Invest in a small set of shared primitives (`UiButton`, layout) before adding a full kit. This keeps accessibility and spacing consistent.
+<% } else { -%>
+## <%= stackLabels.uiLibrary %> notes
+
+Wrap third-party components in thin adapters (`UiButton`) so swapping kits later is cheaper and theme overrides stay centralized (see `providers.<%= jsxExt %>`).
+<% } -%>
+
+## Best practices
+
+- One visual language: spacing, type scale, and radius should feel intentional.
+- Prefer composition over deep CSS specificity wars.
+- Ensure focus states are visible for keyboard users.
+- Keep marketing/landing flair out of app chrome unless product requires it.
+
+## Related
+
+- Architecture: `docs/architecture.md`
+- Accessibility checklist: `docs/best-practices.md`

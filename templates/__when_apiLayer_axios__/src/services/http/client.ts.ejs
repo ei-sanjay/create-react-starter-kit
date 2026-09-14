@@ -1,0 +1,174 @@
+import axios<% if (isTypeScript) { %>, {
+  type AxiosError,
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+}<% } %> from 'axios';
+import { env } from '@/config/env';
+import { ApiError, mapStatusToCode } from './errors';
+
+const REQUEST_ID_HEADER = 'X-Request-Id';
+
+/**
+ * Swap this for your real auth storage (cookie, memory store, secure storage).
+ * Keep token reads out of React components — the HTTP layer owns them.
+ */
+function getAccessToken()<% if (isTypeScript) { %>: string | null<% } %> {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem('access_token');
+}
+
+function createRequestId()<% if (isTypeScript) { %>: string<% } %> {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `req_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function toApiError(error<% if (isTypeScript) { %>: unknown<% } %>)<% if (isTypeScript) { %>: ApiError<% } %> {
+  if (error instanceof ApiError) return error;
+
+  if (axios.isAxiosError(error)) {
+    const axiosError = error<% if (isTypeScript) { %> as AxiosError<{ message?: string; errors?: unknown }><% } %>;
+    const status = axiosError.response?.status;
+    const requestId =
+      (axiosError.config?.headers?.[REQUEST_ID_HEADER]<% if (isTypeScript) { %> as string | undefined<% } %>) ??
+      undefined;
+
+    if (axiosError.code === 'ECONNABORTED') {
+      return new ApiError({
+        message: 'Request timed out. Please try again.',
+        code: 'TIMEOUT',
+        requestId,
+        cause: error,
+      });
+    }
+
+    if (!axiosError.response) {
+      return new ApiError({
+        message: 'Network error. Check your connection and try again.',
+        code: 'NETWORK',
+        requestId,
+        cause: error,
+      });
+    }
+
+    const message =
+      axiosError.response.data?.message ||
+      axiosError.message ||
+      `Request failed with status ${status}`;
+
+    return new ApiError({
+      message,
+      status,
+      code: mapStatusToCode(status),
+      details: axiosError.response.data?.errors ?? axiosError.response.data,
+      requestId,
+      cause: error,
+    });
+  }
+
+  return new ApiError({
+    message: error instanceof Error ? error.message : 'Unexpected API error',
+    cause: error,
+  });
+}
+
+export const apiClient<% if (isTypeScript) { %>: AxiosInstance<% } %> = axios.create({
+  baseURL: env.apiBaseUrl,
+  timeout: 15_000,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+  // Enable when your API uses cookie sessions across origins:
+  // withCredentials: true,
+});
+
+apiClient.interceptors.request.use((config<% if (isTypeScript) { %>: InternalAxiosRequestConfig<% } %>) => {
+  const headers = config.headers ?? {};
+  const requestId = createRequestId();
+  headers[REQUEST_ID_HEADER] = requestId;
+
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  config.headers = headers;
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const apiError = toApiError(error);
+
+    // Central place to react to auth expiry (redirect, toast, refresh flow).
+    if (apiError.isUnauthorized && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized', { detail: apiError }));
+    }
+
+    if (import.meta.env.MODE !== 'production') {
+      console.error('[api]', {
+        message: apiError.message,
+        status: apiError.status,
+        code: apiError.code,
+        requestId: apiError.requestId,
+      });
+    }
+
+    return Promise.reject(apiError);
+  },
+);
+
+<% if (isTypeScript) { -%>
+export type RequestOptions = AxiosRequestConfig & {
+  signal?: AbortSignal;
+};
+<% } -%>
+
+export async function apiGet<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  options<% if (isTypeScript) { %>?: RequestOptions<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.get<% if (isTypeScript) { %><T><% } %>(path, options);
+  return data;
+}
+
+export async function apiPost<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: RequestOptions<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.post<% if (isTypeScript) { %><T><% } %>(path, body, options);
+  return data;
+}
+
+export async function apiPut<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: RequestOptions<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.put<% if (isTypeScript) { %><T><% } %>(path, body, options);
+  return data;
+}
+
+export async function apiPatch<% if (isTypeScript) { %><T = unknown, B = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  body<% if (isTypeScript) { %>?: B<% } %>,
+  options<% if (isTypeScript) { %>?: RequestOptions<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.patch<% if (isTypeScript) { %><T><% } %>(path, body, options);
+  return data;
+}
+
+export async function apiDelete<% if (isTypeScript) { %><T = unknown><% } %>(
+  path<% if (isTypeScript) { %>: string<% } %>,
+  options<% if (isTypeScript) { %>?: RequestOptions<% } %>,
+)<% if (isTypeScript) { %>: Promise<T><% } %> {
+  const { data } = await apiClient.delete<% if (isTypeScript) { %><T><% } %>(path, options);
+  return data;
+}
+
+export { ApiError };

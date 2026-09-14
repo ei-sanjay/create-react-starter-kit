@@ -225,6 +225,7 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       type: 'list',
       name: 'apiLayer',
       message: 'API Layer?',
+      when: (answers: { serverState?: string }) => answers.serverState !== 'rtk-query',
       choices: [
         { name: 'REST via Axios', value: 'axios' },
         { name: 'REST via Fetch', value: 'fetch' },
@@ -260,6 +261,13 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
   // Safety: RTK Query requires Redux Toolkit
   if (stack.serverState === 'rtk-query' && stack.stateManagement !== 'redux') {
     stack.serverState = 'tanstack-query';
+  }
+
+  // RTK Query already provides HTTP (fetchBaseQuery) — skip a separate axios/fetch client
+  if (stack.serverState === 'rtk-query') {
+    stack.apiLayer = 'none';
+  } else if (!stack.apiLayer) {
+    stack.apiLayer = 'axios';
   }
 
   const { installDependencies } = await inquirer.prompt<{

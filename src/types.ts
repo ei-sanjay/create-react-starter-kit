@@ -18,7 +18,7 @@ export type E2ETesting = 'playwright' | 'cypress' | 'none';
 export type VisualTesting = 'storybook' | 'chromatic' | 'none';
 export type Linting = 'eslint' | 'biome';
 export type Formatting = 'prettier' | 'stylelint';
-export type ApiLayer = 'axios' | 'fetch';
+export type ApiLayer = 'axios' | 'fetch' | 'none';
 export type PackageManager = 'pnpm' | 'yarn' | 'npm';
 export type ErrorTracking = 'sentry' | 'bugsnag' | 'logrocket' | 'datadog' | 'none';
 

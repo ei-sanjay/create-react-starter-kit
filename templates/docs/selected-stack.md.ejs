@@ -1,44 +1,146 @@
 # Selected stack
 
-This document explains each choice made when generating **<%= projectName %>**.
+This document explains each choice made when generating **<%= projectName %>**, how to use it day-to-day, and the practices that keep the codebase maintainable.
 
 ## Build — <%= stackLabels.buildTool %>
 
-Fast local feedback and a production bundle. Prefer keeping config minimal; add plugins only when needed.
+<% if (buildTool === 'vite') { -%>
+Vite gives fast HMR and a Rollup-based production build. Config lives in `vite.config.<%= ext %>`.
 
-**Best practice:** lock Node and package manager versions in CI for reproducible builds.
+**Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:5173
+<% } else if (buildTool === 'webpack') { -%>
+Webpack is configured in `webpack.config.js` with Babel (or TS pipeline), HtmlWebpackPlugin, and a dev server.
+
+**Day-to-day:** `<%= packageManager === 'npm' ? 'npm run' : packageManager %> dev` → http://localhost:3000
+<% } else { -%>
+Your bundler is wired with scripts in `package.json`. Prefer keeping config minimal; add plugins only when needed.
+<% } -%>
+
+**Best practices**
+
+- Lock Node and package manager versions in CI.
+- Treat `build` as the source of truth for production issues (not only `dev`).
+- Keep path aliases (`@/`) in sync between TS config and the bundler.
 
 ## Language — <%= stackLabels.language %>
 
 <% if (isTypeScript) { -%>
-TypeScript catches contract mistakes early. Keep `strict` on; avoid `any` except at true boundaries.
+TypeScript catches contract mistakes early. Keep `strict` on; avoid `any` except at true boundaries (third-party quirks, gradual migrations).
+
+**Pattern:** model API payloads in `src/types/models.<%= ext %>`, not inline in components.
 <% } else { -%>
-JavaScript keeps the barrier low. Consider migrating hot modules to TypeScript as the app grows.
+JavaScript keeps the barrier low. Prefer JSDoc for public helpers, and consider migrating hot modules to TypeScript as the app grows.
 <% } -%>
 
 ## Routing — <%= stackLabels.router %>
 
 Client-side navigation with nested layouts. Keep route modules thin; push data loading into features.
 
+**Best practices**
+
+- Colocate route-level UI under `src/routes/`.
+- Avoid fetching in layout components unless every child needs the data.
+- Use loading/error UI at the feature boundary.
+
 ## Client state — <%= stackLabels.stateManagement %>
 
 Use for UI state (modals, wizards, ephemeral counters). Do **not** mirror server entities here if you have a server-state library.
 
+**Live demo:** `/counter` → `src/features/counter/`
+
+**Best practices**
+
+- Feature-local state first; promote to global only when multiple distant trees need it.
+- Keep stores/slices focused on one domain.
+- Prefer selectors/hooks over reading the whole store in components.
+
 ## Server state — <%= stackLabels.serverState %>
 
-Caches remote data, handles loading/error, and deduplicates requests. Example: posts panel on the home page.
+Caches remote data, handles loading/error, and deduplicates requests.
+
+**Live demo:** `/posts` → `src/features/posts/PostsPanel.<%= jsxExt %>`
+
+<% if (serverState === 'rtk-query') { -%>
+**How to use**
+
+1. Define endpoints in `src/store/postsApi.<%= ext %>` (or a new `*Api` slice).
+2. Export hooks (`useGetPostsQuery`, `useCreateFeedbackMutation`).
+3. Call hooks from features — no manual `useEffect` fetching.
+
+**Best practices**
+
+- Use `tagTypes` + `providesTags` / `invalidatesTags` for cache coherence.
+- Put auth headers in `prepareHeaders`, not in every endpoint.
+- Prefer mutations for writes; invalidate related query tags after success.
+<% } else if (serverState === 'tanstack-query') { -%>
+**How to use**
+
+```tsx
+const { data, isLoading, error, refetch } = useQuery({
+  queryKey: ['posts'],
+  queryFn: ({ signal }) => fetchPosts(signal),
+});
+```
+
+**Best practices**
+
+- Stable, hierarchical query keys: `['posts']`, `['posts', id]`.
+- Pass `signal` into your HTTP helpers so navigations cancel in-flight work.
+- Keep `queryFn` thin — call domain API helpers, not raw HTTP.
+<% } else if (serverState === 'swr') { -%>
+**How to use**
+
+SWR is configured in `providers.<%= jsxExt %>` with a shared `fetcher`. Components call `useSWR(key)`.
+
+**Best practices**
+
+- Keys should be URLs or stable resource identifiers.
+- Use `mutate` for local revalidation after writes.
+<% } else { -%>
+No dedicated server-state library was selected. Prefer adding one before the app grows past a few screens.
+<% } -%>
 
 ## Forms — <%= stackLabels.forms %> / Validation — <%= stackLabels.validation %>
 
 Schemas define the contract; the form library binds inputs. Share schemas with API payloads when possible.
 
+**Live demo:** `/feedback` → `src/features/feedback/FeedbackForm.<%= jsxExt %>`
+**Schemas:** `src/lib/validation.<%= ext %>`
+
+**Best practices**
+
+- Validate on submit (and optionally on blur) — avoid blocking every keystroke unless UX requires it.
+- Keep error messages user-facing; log technical details separately.
+- Reuse the same schema on the server if you own both sides.
+
 ## Styling — <%= stackLabels.styling %> / UI — <%= stackLabels.uiLibrary %>
 
 Tokens and primitives establish visual consistency. Prefer composition over one-off CSS.
 
+**Best practices**
+
+- Wrap third-party primitives in thin adapters (`UiButton`) so swapping kits later is cheaper.
+- Keep global tokens in `src/styles/`; keep feature-specific styles close to the feature.
+
 ## API — <%= stackLabels.apiLayer %>
 
-Centralize base URL, headers, and error logging in `src/services/api.<%= ext %>`.
+<% if (apiLayer === 'none') { -%>
+HTTP is owned by **RTK Query** (`fetchBaseQuery`). There is intentionally **no** separate Axios/Fetch client in this project.
+
+See `docs/examples/data-fetching.md` and `src/store/postsApi.<%= ext %>`.
+<% } else if (apiLayer === 'axios') { -%>
+Axios is configured under `src/services/http/` with:
+
+- request interceptors (auth token, request IDs)
+- response interceptors (normalized `ApiError`, 401 event)
+- domain helpers in `src/services/api.<%= ext %>`
+
+See `docs/examples/api.md` for patterns and examples.
+<% } else { -%>
+A shared Fetch wrapper lives under `src/services/http/` with timeout, auth headers, request IDs, and normalized `ApiError`s. Domain helpers sit in `src/services/api.<%= ext %>`.
+
+See `docs/examples/api.md` for patterns and examples.
+<% } -%>
 
 ## Quality gates
 
@@ -52,4 +154,4 @@ Centralize base URL, headers, and error logging in `src/services/api.<%= ext %>`
 | Git hooks | Husky + lint-staged + commitlint |
 | Structure | Feature-based + `@/` aliases |
 
-See `docs/examples/` for focused usage notes.
+See `docs/examples/` for focused usage notes with deeper examples.

@@ -8,20 +8,74 @@
 
 ## When to use
 
-- Unit: pure logic + component behavior
-- E2E: critical journeys across routes
-- Visual: regressions in UI appearance
+| Layer | Use for | Avoid using for |
+|-------|---------|-----------------|
+| Unit / RTL | logic, component behavior, form validation | full auth/payment journeys |
+| E2E | critical user journeys across routes | asserting every CSS class |
+| Visual | regressions in appearance / states | business-rule correctness |
 
-## Best practice
+## How to run
 
-Keep e2e thin. Prefer Testing Library queries that reflect how users find elements (`getByRole`, labels).
+<% if (unitTesting !== 'none') { -%>
+```bash
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:watch
+```
+<% } -%>
+<% if (e2eTesting === 'playwright') { -%>
+```bash
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:install   # once
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:ui
+```
 
-## Locations
+E2E base URL: `http://127.0.0.1:<%= buildTool === 'webpack' ? 3000 : 5173 %>`
+<% } else if (e2eTesting === 'cypress') { -%>
+```bash
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e
+```
+<% } -%>
+<% if (visualTesting === 'storybook') { -%>
+```bash
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> storybook
+```
+<% } -%>
+
+## Project layout
 
 - Setup: `tests/setup.<%= ext %>` (when applicable)
-- Component smoke: `tests/App.test.<%= jsxExt %>`
+- Unit suites: `tests/*.test.<%= jsxExt %>`
 <% if (e2eTesting === 'playwright') { -%>
-- E2E: `tests/e2e/home.spec.<%= ext %>`
+- E2E: `tests/e2e/*.spec.<%= ext %>` (excluded from unit runner)
 <% } else if (e2eTesting === 'cypress') { -%>
-- E2E: `cypress/e2e/home.cy.<%= ext %>`
+- E2E: `cypress/e2e/*`
 <% } -%>
+<% if (visualTesting === 'storybook') { -%>
+- Stories: `src/**/*.stories.<%= jsxExt %>`
+<% } -%>
+
+## Best practices
+
+- Query the way users do: `getByRole`, label text, placeholder — not implementation details.
+- Mock at the **network/domain boundary**:
+<% if (serverState === 'rtk-query') { -%>
+  - mock RTK hooks/endpoints for unit tests when you are not integration-testing the store
+<% } else { -%>
+  - mock `@/services/api` helpers rather than axios/fetch internals
+<% } -%>
+- Keep e2e **thin**: home load, posts happy path, feedback submit.
+- Do not let unit tests import Playwright specs (unit config excludes `tests/e2e`).
+- For async UI, prefer `findBy*` / `waitFor` over arbitrary `sleep`.
+
+## Example unit test shape
+
+```tsx
+renderWithProviders(<FeedbackForm />);
+await user.click(screen.getByRole('button', { name: /Send feedback/i }));
+expect(screen.getAllByText(/required|valid email/i).length).toBeGreaterThan(0);
+```
+
+## Related
+
+- Strategy & CI: `docs/best-practices.md`
+- Forms guide: `docs/examples/forms.md`

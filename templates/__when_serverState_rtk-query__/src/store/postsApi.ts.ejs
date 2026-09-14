@@ -1,19 +1,42 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 <% if (isTypeScript) { -%>
-import type { Post } from '@/services/api';
+import type { FeedbackPayload, Post } from '@/types/models';
 <% } -%>
 import { env } from '@/config/env';
 
-const baseUrl = env.apiBaseUrl;
-
+/**
+ * RTK Query owns HTTP for this stack — no separate Axios/Fetch client is generated.
+ * Use `prepareHeaders` for auth and `tagTypes` for cache invalidation.
+ */
 export const postsApi = createApi({
   reducerPath: 'postsApi',
-  baseQuery: fetchBaseQuery({ baseUrl }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: env.apiBaseUrl,
+    prepareHeaders: (headers) => {
+      const token =
+        typeof window !== 'undefined' ? window.localStorage.getItem('access_token') : null;
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      headers.set('Accept', 'application/json');
+      return headers;
+    },
+  }),
+  tagTypes: ['Posts'],
   endpoints: (builder) => ({
     getPosts: builder.query<% if (isTypeScript) { %><Post[], void><% } %>({
       query: () => '/posts?_limit=5',
+      providesTags: ['Posts'],
+    }),
+    createFeedback: builder.mutation<% if (isTypeScript) { %><{ id: number }, FeedbackPayload><% } %>({
+      query: (body) => ({
+        url: '/posts',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Posts'],
     }),
   }),
 });
 
-export const { useGetPostsQuery } = postsApi;
+export const { useGetPostsQuery, useCreateFeedbackMutation } = postsApi;

@@ -14,7 +14,7 @@ export function PostsPanel() {
 <% if (serverState === 'tanstack-query') { -%>
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['posts'],
-    queryFn: fetchPosts,
+    queryFn: ({ signal }) => fetchPosts(signal),
   });
 <% } else if (serverState === 'swr') { -%>
   const { data, error, isLoading, isValidating, mutate } = useSWR('/posts?_limit=5');

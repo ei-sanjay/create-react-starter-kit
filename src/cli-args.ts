@@ -85,7 +85,8 @@ export function buildDefaultAnswers(options: {
     visualTesting: 'storybook',
     linting: 'eslint',
     formatting: 'prettier',
-    apiLayer: 'axios',
+    // RTK Query owns HTTP via fetchBaseQuery — no separate axios/fetch client
+    apiLayer: 'none',
     packageManager: 'pnpm',
     errorTracking: 'sentry',
     installDependencies: !options.skipInstall,

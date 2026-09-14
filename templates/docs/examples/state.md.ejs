@@ -2,16 +2,60 @@
 
 **Library:** <%= stackLabels.stateManagement %>
 
-**Live demo:** Counter panel on `/`
+**Live demo:** `/counter` → `src/features/counter/CounterPanel.<%= jsxExt %>`
+**Store wiring:** `src/store/`
 
 ## When to use
 
-Shared interactive state that is not fetched from an API (wizard steps, UI toggles, local counters).
+Shared interactive state that is **not** fetched from an API:
 
-## Best practice
+- wizard steps, UI toggles, selected tabs
+- ephemeral counters / filters that reset often
+- cross-route UI that should survive navigation but not a full reload
 
-Keep stores/slices focused. Prefer feature-local state; promote to global only when multiple distant trees need it.
+If the data comes from your backend, prefer **<%= stackLabels.serverState %>** instead.
 
-## Snippet
+## How to use in this project
 
-See `src/features/counter/CounterPanel.<%= jsxExt %>` and `src/store/`.
+<% if (stateManagement === 'redux') { -%>
+1. Counter slice lives in `src/store/index.<%= ext %>` (`counterSlice` + `store`).
+2. Read/write with `useSelector` / `useDispatch` from the feature panel (or add typed hooks later).
+
+```tsx
+import { useDispatch, useSelector } from 'react-redux';
+import { increment, type RootState } from '@/store';
+
+const value = useSelector((s: RootState) => s.counter.value);
+const dispatch = useDispatch();
+dispatch(increment());
+```
+<% } else if (stateManagement === 'zustand') { -%>
+Create/consume the store from `src/store/index.<%= ext %>` with selectors so components only re-render on the slices they need.
+
+```tsx
+import { useCounterStore } from '@/store';
+
+const value = useCounterStore((s) => s.value);
+const increment = useCounterStore((s) => s.increment);
+```
+<% } else if (stateManagement === 'jotai') { -%>
+Define atoms in `src/store/index.<%= ext %>` and compose them. Wrap the tree with `Provider` (already done in `providers.<%= jsxExt %>`).
+<% } else if (stateManagement === 'context') { -%>
+Use the provided context + reducer pattern in `src/store/context`. Keep the context value stable; expose actions through a custom hook.
+<% } else { -%>
+No global client-state library was selected. Prefer React local state until multiple distant trees need the same data.
+<% } -%>
+
+## Best practices
+
+- **Feature-local first.** Promote to global only when props drilling becomes painful across routes.
+- **One concern per store/slice.** Avoid a single “appState” blob.
+- **Do not mirror server entities** in client state when you already use <%= stackLabels.serverState %>.
+- Prefer selectors/hooks over reading the entire store in leaf components.
+- Keep side effects (HTTP, analytics) out of reducers; trigger them from thunks/listeners/components.
+
+## Common pitfalls
+
+- Putting API responses into Redux/Zustand “because we might need them later”
+- Updating global state on every keystroke in a form (forms belong to <%= stackLabels.forms %>)
+- Forgetting to reset ephemeral UI state when leaving a flow
