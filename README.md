@@ -43,7 +43,7 @@ create-react-starter-kit -y --name my-app --dir ./apps/my-app --skip-install
 - Complete React app with navigation, layout, and demo panels
 - Real examples for selected state, data fetching, forms, validation, UI, and API layers
 - `docs/` with architecture, getting started, best practices, and stack notes
-- Tooling configs (Vite/Webpack/Rsbuild/Parcel, ESLint/Biome, Prettier, tests, etc.)
+- Tooling configs (Vite/Webpack/Rsbuild, ESLint/Biome, Prettier, tests, etc.)
 - Husky pre-commit (lint-staged) + commit-msg (commitlint / Conventional Commits)
 - Feature-based `src/` layout + `@/` path aliases (tsconfig + bundler)
 - `README.md` tailored to the selected stack

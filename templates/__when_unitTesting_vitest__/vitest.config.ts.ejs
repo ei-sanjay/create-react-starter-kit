@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
-// Standalone Vitest config for non-Vite build tools (Webpack, Parcel, etc.).
+// Standalone Vitest config for non-Vite build tools (Webpack, Rsbuild, etc.).
 // Vite projects configure Vitest inside vite.config instead.
 export default defineConfig({
   plugins: [react()],

@@ -55,13 +55,6 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
         devDependencies['@rsbuild/plugin-sass'] = '^1.3.1';
       }
       break;
-    case 'parcel':
-      devDependencies['parcel'] = '^2.14.1';
-      // Parcel injects env via process.env; TS needs Node types.
-      if (isTs) {
-        devDependencies['@types/node'] = '^22.13.10';
-      }
-      break;
   }
 
   if (isTs) {
@@ -323,11 +316,6 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
       scripts.dev = 'rsbuild dev';
       scripts.build = 'rsbuild build';
       scripts.preview = 'rsbuild preview';
-      break;
-    case 'parcel':
-      scripts.dev = 'parcel index.html --port 5173';
-      scripts.build = 'parcel build index.html';
-      scripts.preview = 'parcel serve dist --port 5173 --open';
       break;
   }
 

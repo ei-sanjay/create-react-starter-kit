@@ -7,7 +7,6 @@
       "build",
       "coverage",
       "storybook-static",
-      ".parcel-cache",
       "playwright-report",
       "test-results"
     ]

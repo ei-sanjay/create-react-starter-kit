@@ -59,7 +59,6 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
         { name: 'Vite', value: 'vite' },
         { name: 'Webpack', value: 'webpack' },
         { name: 'Rsbuild', value: 'rsbuild' },
-        { name: 'Parcel', value: 'parcel' },
       ],
       default: 'vite',
     },
