@@ -24,12 +24,12 @@ function getTemplatesRoot(): string {
 }
 
 function createContext(answers: ProjectAnswers): TemplateContext {
-  const isTypeScript = answers.language === 'typescript';
   return {
     ...answers,
-    isTypeScript,
-    ext: isTypeScript ? 'ts' : 'js',
-    jsxExt: isTypeScript ? 'tsx' : 'jsx',
+    language: 'typescript',
+    isTypeScript: true,
+    ext: 'ts',
+    jsxExt: 'tsx',
     year: new Date().getFullYear(),
   };
 }
@@ -42,7 +42,6 @@ function labelMap(): Record<string, Record<string, string>> {
       rsbuild: 'Rsbuild',
     },
     language: {
-      javascript: 'JavaScript',
       typescript: 'TypeScript',
     },
     router: {
@@ -214,11 +213,8 @@ function shouldIncludeTemplate(
     }
   }
 
-  // Language-specific templates
-  if (normalized.includes('__ts__/') && answers.language !== 'typescript') {
-    return false;
-  }
-  if (normalized.includes('__js__/') && answers.language !== 'javascript') {
+  // Language-specific templates (TypeScript only)
+  if (normalized.includes('__js__/')) {
     return false;
   }
 
@@ -237,8 +233,8 @@ function resolveOutputPath(
   out = out.replace(/__js__\//g, '');
 
   // Extension placeholders
-  out = out.replace(/\.tsx\.ejs$/, answers.language === 'typescript' ? '.tsx' : '.jsx');
-  out = out.replace(/\.ts\.ejs$/, answers.language === 'typescript' ? '.ts' : '.js');
+  out = out.replace(/\.tsx\.ejs$/, '.tsx');
+  out = out.replace(/\.ts\.ejs$/, '.ts');
   out = out.replace(/\.jsx\.ejs$/, '.jsx');
   out = out.replace(/\.js\.ejs$/, '.js');
   out = out.replace(/\.ejs$/, '');
@@ -334,11 +330,11 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
   }
 
   pkg['lint-staged'] = {
-    [`src/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'},css,scss,md,json}`]:
+    [`src/**/*.{ts,tsx,css,scss,md,json}`]:
       answers.linting === 'biome'
         ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
         : ['prettier --write'],
-    [`tests/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'}}`]:
+    [`tests/**/*.{ts,tsx}`]:
       answers.linting === 'biome'
         ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
         : ['prettier --write'],

@@ -26,15 +26,11 @@ Your bundler is wired with scripts in `package.json`. Prefer keeping config mini
 - Treat `build` as the source of truth for production issues (not only `dev`).
 - Keep path aliases (`@/`) in sync between TS config and the bundler.
 
-## Language — <%= stackLabels.language %>
+## Language — TypeScript
 
-<% if (isTypeScript) { -%>
-TypeScript catches contract mistakes early. Keep `strict` on; avoid `any` except at true boundaries (third-party quirks, gradual migrations).
+TypeScript is the default (and only) language for scaffolds. Keep `strict` on; avoid `any` except at true boundaries (third-party quirks, gradual migrations).
 
 **Pattern:** model API payloads in `src/types/models.<%= ext %>`, not inline in components.
-<% } else { -%>
-JavaScript keeps the barrier low. Prefer JSDoc for public helpers, and consider migrating hot modules to TypeScript as the app grows.
-<% } -%>
 
 ## Routing — <%= stackLabels.router %>
 

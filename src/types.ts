@@ -1,5 +1,5 @@
 export type BuildTool = 'vite' | 'webpack' | 'rsbuild';
-export type Language = 'javascript' | 'typescript';
+export type Language = 'typescript';
 export type Router = 'react-router' | 'tanstack-router';
 export type StateManagement = 'redux' | 'zustand' | 'jotai' | 'context' | 'none';
 export type ServerState = 'tanstack-query' | 'swr' | 'rtk-query' | 'none';

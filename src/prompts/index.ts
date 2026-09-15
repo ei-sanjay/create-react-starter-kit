@@ -51,7 +51,13 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
   const stack = await inquirer.prompt<
     Omit<
       ProjectAnswers,
-      'projectName' | 'targetDir' | 'installDependencies' | 'formatting' | 'apiLayer' | 'serverState'
+      | 'projectName'
+      | 'targetDir'
+      | 'installDependencies'
+      | 'formatting'
+      | 'apiLayer'
+      | 'serverState'
+      | 'language'
     > & { apiLayer?: ProjectAnswers['apiLayer']; serverState?: ProjectAnswers['serverState'] }
   >([
     {
@@ -64,16 +70,6 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
         { name: 'Rsbuild', value: 'rsbuild' },
       ],
       default: 'vite',
-    },
-    {
-      type: 'list',
-      name: 'language',
-      message: 'What language do you want to choose?',
-      choices: [
-        { name: 'JavaScript', value: 'javascript' },
-        { name: 'TypeScript', value: 'typescript' },
-      ],
-      default: 'typescript',
     },
     {
       type: 'list',
@@ -269,6 +265,7 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
     projectName,
     targetDir,
     ...stack,
+    language: 'typescript',
     serverState,
     formatting,
     apiLayer,

@@ -21,7 +21,7 @@ npx create-react-starter-kit
 create-react-starter-kit
 ```
 
-Answer questions one by one (build tool, language, router, state, data fetching, forms, styling, testing, and more). Press **Enter** to accept each default. Every project includes **Husky + lint-staged + commitlint**, a **feature-based** folder layout, and **`@/` path aliases**.
+Answer questions one by one (build tool, router, state, data fetching, forms, styling, testing, and more). Press **Enter** to accept each default. Every project is **TypeScript** and includes **Husky + lint-staged + commitlint**, a **feature-based** folder layout, and **`@/` path aliases**.
 
 ### Non-interactive defaults
 
