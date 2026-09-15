@@ -105,12 +105,12 @@ function labelMap(): Record<string, Record<string, string>> {
       none: 'None',
     },
     linting: {
-      eslint: 'ESLint',
+      eslint: 'ESLint + Prettier',
       biome: 'Biome',
     },
     formatting: {
       prettier: 'Prettier',
-      stylelint: 'Stylelint',
+      none: 'Biome (built-in)',
     },
     apiLayer: {
       axios: 'REST via Axios',
@@ -335,21 +335,21 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
 
   pkg['lint-staged'] = {
     [`src/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'},css,scss,md,json}`]:
-      answers.formatting === 'prettier'
-        ? ['prettier --write']
-        : answers.linting === 'biome'
-          ? ['biome check --write']
-          : ['eslint --fix'],
+      answers.linting === 'biome'
+        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
+        : ['prettier --write'],
     [`tests/**/*.{${answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx'}}`]:
-      answers.formatting === 'prettier'
-        ? ['prettier --write']
-        : answers.linting === 'biome'
-          ? ['biome check --write']
-          : ['eslint --fix'],
+      answers.linting === 'biome'
+        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
+        : ['prettier --write'],
     'docs/**/*.md':
-      answers.formatting === 'prettier' ? ['prettier --write'] : [],
+      answers.linting === 'biome'
+        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
+        : ['prettier --write'],
     '*.{json,md}':
-      answers.formatting === 'prettier' ? ['prettier --write'] : [],
+      answers.linting === 'biome'
+        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
+        : ['prettier --write'],
   };
 
   // Drop empty lint-staged entries

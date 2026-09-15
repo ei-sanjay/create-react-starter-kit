@@ -154,7 +154,7 @@ See `docs/examples/api.md` for patterns and examples.
 | E2E | <%= stackLabels.e2eTesting %> |
 | Visual | <%= stackLabels.visualTesting %> |
 | Lint | <%= stackLabels.linting %> |
-| Format | <%= stackLabels.formatting %> |
+| Lint / format | <%= stackLabels.linting %><% if (formatting === 'prettier') { %> + <%= stackLabels.formatting %><% } else { %> (format included)<% } %> |
 | Git hooks | Husky + lint-staged + commitlint |
 | Structure | Feature-based + `@/` aliases |
 

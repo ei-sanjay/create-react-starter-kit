@@ -240,29 +240,21 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       break;
   }
 
-  // Linting
+  // Linting & formatting
+  // ESLint always pairs with Prettier; Biome owns both lint + format.
   if (answers.linting === 'eslint') {
     devDependencies['eslint'] = '^9.22.0';
     devDependencies['@eslint/js'] = '^9.22.0';
     devDependencies['globals'] = '^16.0.0';
     devDependencies['eslint-plugin-react'] = '^7.37.4';
     devDependencies['eslint-plugin-react-hooks'] = '^5.2.0';
+    devDependencies['eslint-config-prettier'] = '^10.1.1';
+    devDependencies['prettier'] = '^3.5.3';
     if (isTs) {
       devDependencies['typescript-eslint'] = '^8.26.1';
     }
-    if (answers.formatting === 'prettier') {
-      devDependencies['eslint-config-prettier'] = '^10.1.1';
-    }
   } else {
     devDependencies['@biomejs/biome'] = '^1.9.4';
-  }
-
-  // Formatting
-  if (answers.formatting === 'prettier') {
-    devDependencies['prettier'] = '^3.5.3';
-  } else {
-    devDependencies['stylelint'] = '^16.16.0';
-    devDependencies['stylelint-config-standard'] = '^37.0.0';
   }
 
   // API
@@ -346,8 +338,9 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     const joined = prettierGlobs.join(' ');
     scripts.format = `prettier --write ${joined}`;
     scripts['format:check'] = `prettier --check ${joined}`;
-  } else {
-    scripts.format = 'stylelint "src/**/*.{css,scss}" --fix';
+  } else if (answers.linting === 'biome') {
+    scripts.format = 'biome format --write .';
+    scripts['format:check'] = 'biome format .';
   }
 
   switch (answers.unitTesting) {

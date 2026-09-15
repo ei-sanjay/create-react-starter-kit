@@ -23,7 +23,13 @@
 
 ## Linting & formatting
 
-- Tooling: **<%= stackLabels.linting %>** + **<%= stackLabels.formatting %>**
+<% if (linting === 'biome') { -%>
+- Tooling: **Biome** (lint + format in one tool)
+- `lint` runs `biome check`; `format` runs `biome format --write`
+<% } else { -%>
+- Tooling: **ESLint + Prettier**
+- ESLint for code quality; Prettier for consistent formatting (`eslint-config-prettier` disables conflicting rules)
+<% } -%>
 - Run lint before push; treat warnings as debt with a burn-down plan.
 - Husky + lint-staged formats staged files so diffs stay clean.
 - commitlint enforces Conventional Commits on `git commit`.

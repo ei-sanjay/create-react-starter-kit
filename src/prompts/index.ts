@@ -49,7 +49,10 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
   }
 
   const stack = await inquirer.prompt<
-    Omit<ProjectAnswers, 'projectName' | 'targetDir' | 'installDependencies'>
+    Omit<
+      ProjectAnswers,
+      'projectName' | 'targetDir' | 'installDependencies' | 'formatting' | 'apiLayer'
+    > & { apiLayer?: ProjectAnswers['apiLayer'] }
   >([
     {
       type: 'list',
@@ -200,22 +203,12 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
     {
       type: 'list',
       name: 'linting',
-      message: 'Linting / Formatting?',
+      message: 'Linting & formatting?',
       choices: [
-        { name: 'ESLint', value: 'eslint' },
-        { name: 'Biome', value: 'biome' },
+        { name: 'ESLint + Prettier', value: 'eslint' },
+        { name: 'Biome (lint + format)', value: 'biome' },
       ],
       default: 'eslint',
-    },
-    {
-      type: 'list',
-      name: 'formatting',
-      message: 'Formatting?',
-      choices: [
-        { name: 'Prettier', value: 'prettier' },
-        { name: 'Stylelint', value: 'stylelint' },
-      ],
-      default: 'prettier',
     },
     {
       type: 'list',
@@ -254,17 +247,18 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
     },
   ]);
 
+  // ESLint pairs with Prettier; Biome already formats — no separate formatter prompt
+  const formatting: ProjectAnswers['formatting'] =
+    stack.linting === 'biome' ? 'none' : 'prettier';
+
   // Safety: RTK Query requires Redux Toolkit
   if (stack.serverState === 'rtk-query' && stack.stateManagement !== 'redux') {
     stack.serverState = 'tanstack-query';
   }
 
   // RTK Query already provides HTTP (fetchBaseQuery) — skip a separate axios/fetch client
-  if (stack.serverState === 'rtk-query') {
-    stack.apiLayer = 'none';
-  } else if (!stack.apiLayer) {
-    stack.apiLayer = 'axios';
-  }
+  const apiLayer: ProjectAnswers['apiLayer'] =
+    stack.serverState === 'rtk-query' ? 'none' : (stack.apiLayer ?? 'axios');
 
   const { installDependencies } = await inquirer.prompt<{
     installDependencies: boolean;
@@ -281,6 +275,8 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
     projectName,
     targetDir,
     ...stack,
+    formatting,
+    apiLayer,
     installDependencies,
   };
 }
