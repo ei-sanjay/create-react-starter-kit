@@ -6,6 +6,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 <% } else { -%>
 import { Link, useRouterState } from '@tanstack/react-router';
 <% } -%>
+import { ROUTES } from '@/config/routes';
 
 <% if (isTypeScript && router === 'tanstack-router') { -%>
 interface AppLayoutProps {
@@ -14,11 +15,11 @@ interface AppLayoutProps {
 <% } -%>
 
 const links = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/counter', label: 'Counter' },
-  { to: '/posts', label: 'Posts' },
-  { to: '/feedback', label: 'Feedback' },
-  { to: '/about', label: 'About' },
+  { to: ROUTES.HOME, label: 'Home', end: true },
+  { to: ROUTES.COUNTER, label: 'Counter' },
+  { to: ROUTES.POSTS, label: 'Posts' },
+  { to: ROUTES.FEEDBACK, label: 'Feedback' },
+  { to: ROUTES.ABOUT, label: 'About' },
 ] as const;
 
 export function AppLayout(<% if (router === 'tanstack-router') { %>{ children }<% if (isTypeScript) { %>: AppLayoutProps<% } %><% } %>) {
@@ -54,8 +55,8 @@ export function AppLayout(<% if (router === 'tanstack-router') { %>{ children }<
               key={link.to}
               to={link.to}
               className={
-                link.to === '/'
-                  ? pathname === '/'
+                link.to === ROUTES.HOME
+                  ? pathname === ROUTES.HOME
                     ? 'nav-link active'
                     : 'nav-link'
                   : pathname.startsWith(link.to)

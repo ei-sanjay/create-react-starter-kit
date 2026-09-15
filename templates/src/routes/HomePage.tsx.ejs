@@ -4,20 +4,21 @@ import { Link } from 'react-router-dom';
 import { Link } from '@tanstack/react-router';
 <% } -%>
 import { StackBadge } from '@/components/StackBadge';
+import { ROUTES } from '@/config/routes';
 
 const demos = [
   {
-    to: '/counter',
+    to: ROUTES.COUNTER,
     title: 'Counter',
     body: 'Client state demo with <%= stackLabels.stateManagement %>.',
   },
   {
-    to: '/posts',
+    to: ROUTES.POSTS,
     title: 'Posts',
     body: 'Server state / data fetching with <%= stackLabels.serverState %>.',
   },
   {
-    to: '/feedback',
+    to: ROUTES.FEEDBACK,
     title: 'Feedback',
     body: 'Forms and validation with <%= stackLabels.forms %><% if (validation !== 'none') { %> + <%= stackLabels.validation %><% } %>.',
   },
@@ -34,10 +35,10 @@ export function HomePage() {
           data, and forms — each page is a real working example for your selected stack.
         </p>
         <div className="hero-actions">
-          <Link className="ui-button" to="/counter">
+          <Link className="ui-button" to={ROUTES.COUNTER}>
             Open counter demo
           </Link>
-          <Link className="text-link" to="/about">
+          <Link className="text-link" to={ROUTES.ABOUT}>
             About this starter →
           </Link>
         </div>

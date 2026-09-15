@@ -1,0 +1,9 @@
+/**
+ * Central API path helpers — resource-oriented (not HTTP-verb named).
+ * Keep base URL in `env.apiBaseUrl`; these helpers are path-only.
+ */
+export const API_ROUTES = {
+  posts: '/posts',
+  postsList: (limit = 5)<% if (isTypeScript) { %>: string<% } %> => `/posts?_limit=${limit}`,
+  post: (id<% if (isTypeScript) { %>: number | string<% } %>)<% if (isTypeScript) { %>: string<% } %> => `/posts/${id}`,
+} as const;

@@ -48,13 +48,16 @@ src/
 
 ## Routes
 
+App paths live in `src/config/routes.<%= ext %>` (`ROUTES`). API paths live in
+`src/config/api-routes.<%= ext %>` (`API_ROUTES`). Prefer those constants over string literals.
+
 | Path | Purpose | Primary demo |
 |------|---------|--------------|
-| `/` | Home overview | Stack orientation |
-| `/counter` | Client state | <%= stackLabels.stateManagement %> |
-| `/posts` | Server state | <%= stackLabels.serverState %> |
-| `/feedback` | Forms + validation | <%= stackLabels.forms %> |
-| `/about` | Orientation | Architecture notes |
+| `ROUTES.HOME` (`/`) | Home overview | Stack orientation |
+| `ROUTES.COUNTER` | Client state | <%= stackLabels.stateManagement %> |
+| `ROUTES.POSTS` | Server state | <%= stackLabels.serverState %> |
+| `ROUTES.FEEDBACK` | Forms + validation | <%= stackLabels.forms %> |
+| `ROUTES.ABOUT` | Orientation | Architecture notes |
 
 ## Path aliases
 

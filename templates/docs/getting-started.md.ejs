@@ -86,7 +86,8 @@ Only client-safe variables (typically `VITE_*`) are exposed to the browser. Neve
 <% } else { -%>
 5. Add HTTP helpers in `src/services/api.<%= ext %>` (and keep transport details in `src/services/http/`)
 <% } -%>
-6. Import with `@/` — e.g. `import { env } from '@/config/env'`
+6. Put path constants in `src/config/routes.<%= ext %>` and `src/config/api-routes.<%= ext %>`
+7. Import with `@/` — e.g. `import { ROUTES } from '@/config/routes'`
 
 ## Testing
 

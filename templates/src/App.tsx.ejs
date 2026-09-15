@@ -1,6 +1,7 @@
 <% if (router === 'react-router') { -%>
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ROUTES } from '@/config/routes';
 import { HomePage } from '@/routes/HomePage';
 import { AboutPage } from '@/routes/AboutPage';
 import { CounterPage } from '@/routes/CounterPage';
@@ -12,12 +13,12 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/counter" element={<CounterPage />} />
-          <Route path="/posts" element={<PostsPage />} />
-          <Route path="/feedback" element={<FeedbackPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+          <Route path={ROUTES.COUNTER} element={<CounterPage />} />
+          <Route path={ROUTES.POSTS} element={<PostsPage />} />
+          <Route path={ROUTES.FEEDBACK} element={<FeedbackPage />} />
+          <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -32,6 +33,7 @@ import {
   createRouter,
 } from '@tanstack/react-router';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ROUTES } from '@/config/routes';
 import { HomePage } from '@/routes/HomePage';
 import { AboutPage } from '@/routes/AboutPage';
 import { CounterPage } from '@/routes/CounterPage';
@@ -52,31 +54,31 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: ROUTES.HOME,
   component: HomePage,
 });
 
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/about',
+  path: ROUTES.ABOUT,
   component: AboutPage,
 });
 
 const counterRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/counter',
+  path: ROUTES.COUNTER,
   component: CounterPage,
 });
 
 const postsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/posts',
+  path: ROUTES.POSTS,
   component: PostsPage,
 });
 
 const feedbackRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/feedback',
+  path: ROUTES.FEEDBACK,
   component: FeedbackPage,
 });
 

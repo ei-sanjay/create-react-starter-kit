@@ -13,14 +13,17 @@ You selected **RTK Query**, which already provides:
 
 Adding Axios/Fetch beside RTK Query usually creates **two HTTP stacks**, duplicated auth logic, and inconsistent error handling.
 
-**Where HTTP lives:** `src/store/postsApi.<%= ext %>`
+**Where HTTP lives:** `src/store/postsApi.<%= ext %>`  
+**Path constants:** `src/config/api-routes.<%= ext %>` (`API_ROUTES`) and `src/config/routes.<%= ext %>` (`ROUTES`)
 
 ### Extending RTK Query
 
 ```ts
+import { API_ROUTES } from '@/config/api-routes';
+
 // add to endpoints
 getPostById: builder.query({
-  query: (id) => `/posts/${id}`,
+  query: (id) => API_ROUTES.post(id),
   providesTags: (_result, _error, id) => [{ type: 'Posts', id }],
 }),
 ```
@@ -99,6 +102,8 @@ try {
 
 ## Best practices
 
+- Prefer `API_ROUTES` from `src/config/api-routes.<%= ext %>` over hardcoded paths.
+- Prefer `ROUTES` from `src/config/routes.<%= ext %>` for in-app navigation and e2e.
 - **Components never import axios.** Use domain helpers or at least `@/services/http`.
 - Keep token reads inside the HTTP layer (`getAccessToken`), not in every feature.
 - Listen once for `auth:unauthorized` near the app shell to centralize logout/redirect.
@@ -119,8 +124,10 @@ Keep that logic in `http/client.<%= ext %>` so features stay unaware.
 
 ```ts
 // src/services/api.ts
+import { API_ROUTES } from '@/config/api-routes';
+
 export async function fetchPost(id: number, signal?: AbortSignal) {
-  return apiGet<Post>(`/posts/${id}`, { signal });
+  return apiGet<Post>(API_ROUTES.post(id), { signal });
 }
 ```
 <% } else { -%>
@@ -167,6 +174,7 @@ try {
 
 ## Best practices
 
+- Prefer `API_ROUTES` from `src/config/api-routes.<%= ext %>` over hardcoded paths.
 - Prefer domain helpers over raw `request()` in components.
 - Pass `signal` from TanStack Query / user cancellation.
 - Keep JSON as the default; use `rawBody: true` for `FormData` uploads.

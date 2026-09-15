@@ -1,0 +1,15 @@
+/**
+ * Central app route paths — use these in the router, nav, links, and e2e.
+ * Change a path here once; do not scatter string literals across the app.
+ */
+export const ROUTES = {
+  HOME: '/',
+  ABOUT: '/about',
+  COUNTER: '/counter',
+  POSTS: '/posts',
+  FEEDBACK: '/feedback',
+} as const;
+
+<% if (isTypeScript) { -%>
+export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
+<% } -%>

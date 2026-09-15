@@ -1,3 +1,5 @@
+import { ROUTES } from '@/config/routes';
+
 export function AboutPage() {
   return (
     <div className="page about-page">
@@ -8,8 +10,9 @@ export function AboutPage() {
       </p>
       <ul className="about-list">
         <li>
-          <strong>Routes:</strong> <code>/</code>, <code>/counter</code>, <code>/posts</code>,{' '}
-          <code>/feedback</code>, <code>/about</code>
+          <strong>Routes:</strong> <code>{ROUTES.HOME}</code>, <code>{ROUTES.COUNTER}</code>,{' '}
+          <code>{ROUTES.POSTS}</code>, <code>{ROUTES.FEEDBACK}</code>, <code>{ROUTES.ABOUT}</code>
+          {' '}(defined in <code>src/config/routes.<%= ext %></code>)
         </li>
         <li>
           <strong>Extend features</strong> under <code>src/features/&lt;name&gt;/</code>.

@@ -1,6 +1,8 @@
+import { ROUTES } from '../../src/config/routes';
+
 describe('Home', () => {
   it('loads the starter', () => {
-    cy.visit('/');
+    cy.visit(ROUTES.HOME);
     cy.contains('<%= projectName %>');
   });
 });
