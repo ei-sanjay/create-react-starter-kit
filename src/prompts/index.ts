@@ -51,8 +51,8 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
   const stack = await inquirer.prompt<
     Omit<
       ProjectAnswers,
-      'projectName' | 'targetDir' | 'installDependencies' | 'formatting' | 'apiLayer'
-    > & { apiLayer?: ProjectAnswers['apiLayer'] }
+      'projectName' | 'targetDir' | 'installDependencies' | 'formatting' | 'apiLayer' | 'serverState'
+    > & { apiLayer?: ProjectAnswers['apiLayer']; serverState?: ProjectAnswers['serverState'] }
   >([
     {
       type: 'list',
@@ -102,19 +102,13 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       type: 'list',
       name: 'serverState',
       message: 'Server State / Data Fetching?',
-      choices: (answers: { stateManagement?: string }) => {
-        const choices = [
-          { name: 'TanStack Query', value: 'tanstack-query' },
-          { name: 'SWR', value: 'swr' },
-          { name: 'None', value: 'none' },
-        ];
-        if (answers.stateManagement === 'redux') {
-          choices.splice(2, 0, { name: 'RTK Query', value: 'rtk-query' });
-        }
-        return choices;
-      },
-      default: (answers: { stateManagement?: string }) =>
-        answers.stateManagement === 'redux' ? 'rtk-query' : 'tanstack-query',
+      when: (answers: { stateManagement?: string }) => answers.stateManagement !== 'redux',
+      choices: [
+        { name: 'TanStack Query', value: 'tanstack-query' },
+        { name: 'SWR', value: 'swr' },
+        { name: 'None', value: 'none' },
+      ],
+      default: 'tanstack-query',
     },
     {
       type: 'list',
@@ -214,7 +208,8 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       type: 'list',
       name: 'apiLayer',
       message: 'API Layer?',
-      when: (answers: { serverState?: string }) => answers.serverState !== 'rtk-query',
+      when: (answers: { stateManagement?: string; serverState?: string }) =>
+        answers.stateManagement !== 'redux' && answers.serverState !== 'rtk-query',
       choices: [
         { name: 'REST via Axios', value: 'axios' },
         { name: 'REST via Fetch', value: 'fetch' },
@@ -251,14 +246,13 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
   const formatting: ProjectAnswers['formatting'] =
     stack.linting === 'biome' ? 'none' : 'prettier';
 
-  // Safety: RTK Query requires Redux Toolkit
-  if (stack.serverState === 'rtk-query' && stack.stateManagement !== 'redux') {
-    stack.serverState = 'tanstack-query';
-  }
+  // Redux Toolkit always uses RTK Query — skip the server-state prompt
+  const serverState: ProjectAnswers['serverState'] =
+    stack.stateManagement === 'redux' ? 'rtk-query' : (stack.serverState ?? 'tanstack-query');
 
   // RTK Query already provides HTTP (fetchBaseQuery) — skip a separate axios/fetch client
   const apiLayer: ProjectAnswers['apiLayer'] =
-    stack.serverState === 'rtk-query' ? 'none' : (stack.apiLayer ?? 'axios');
+    serverState === 'rtk-query' ? 'none' : (stack.apiLayer ?? 'axios');
 
   const { installDependencies } = await inquirer.prompt<{
     installDependencies: boolean;
@@ -275,6 +269,7 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
     projectName,
     targetDir,
     ...stack,
+    serverState,
     formatting,
     apiLayer,
     installDependencies,
