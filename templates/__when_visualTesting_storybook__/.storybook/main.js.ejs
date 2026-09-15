@@ -1,8 +1,9 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import webpack from 'webpack';
-<% if (buildTool === 'vite') { -%>
+<% if (buildTool === 'vite' || buildTool === 'rsbuild') { -%>
 import { mergeConfig } from 'vite';
+<% } else { -%>
+import webpack from 'webpack';
 <% } -%>
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -19,23 +20,24 @@ const metaEnv = {
   VITE_DATADOG_SITE: process.env.VITE_DATADOG_SITE || 'datadoghq.com',
 };
 
-/** @type { import('@storybook/<%= buildTool === 'vite' ? 'react-vite' : 'react-webpack5' %>').StorybookConfig } */
+<% const useViteStorybook = buildTool === 'vite' || buildTool === 'rsbuild'; -%>
+/** @type { import('@storybook/<%= useViteStorybook ? 'react-vite' : 'react-webpack5' %>').StorybookConfig } */
 const config = {
   stories: ['../src/**/*.stories.@(<%= isTypeScript ? 'ts|tsx' : 'js|jsx' %>)'],
   addons: [
     '@storybook/addon-essentials',
-<% if (buildTool !== 'vite') { -%>
+<% if (!useViteStorybook) { -%>
     '@storybook/addon-webpack5-compiler-babel',
 <% } -%>
   ],
   framework: {
-    name: '@storybook/<%= buildTool === 'vite' ? 'react-vite' : 'react-webpack5' %>',
+    name: '@storybook/<%= useViteStorybook ? 'react-vite' : 'react-webpack5' %>',
     options: {},
   },
   docs: {
     autodocs: 'tag',
   },
-<% if (buildTool === 'vite') { -%>
+<% if (useViteStorybook) { -%>
   async viteFinal(config) {
     return mergeConfig(config, {
       resolve: {

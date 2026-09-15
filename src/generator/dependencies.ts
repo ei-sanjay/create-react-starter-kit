@@ -226,8 +226,13 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       devDependencies['storybook'] = '^8.6.4';
       devDependencies['@storybook/react'] = '^8.6.4';
       devDependencies['@storybook/addon-essentials'] = '^8.6.4';
-      if (answers.buildTool === 'vite') {
+      if (answers.buildTool === 'vite' || answers.buildTool === 'rsbuild') {
+        // Storybook Vite builder is independent of the app bundler (works for Rsbuild apps too).
         devDependencies['@storybook/react-vite'] = '^8.6.4';
+        if (answers.buildTool === 'rsbuild') {
+          devDependencies['vite'] = '^6.2.2';
+          devDependencies['@vitejs/plugin-react'] = '^4.3.4';
+        }
       } else {
         devDependencies['@storybook/react-webpack5'] = '^8.6.4';
         // Storybook 8 webpack builder needs an explicit compiler for TS/JSX.
