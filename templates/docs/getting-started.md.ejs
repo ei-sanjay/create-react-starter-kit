@@ -49,17 +49,19 @@ Useful scripts:
 
 ## Git hooks
 
-Husky + lint-staged + commitlint are included by default.
+Husky + commitlint are included by default.
 
 ```bash
 git init
 <%= packageManager === 'npm' ? 'npm run prepare' : packageManager === 'yarn' ? 'yarn prepare' : 'pnpm prepare' %>
 ```
 
-- **pre-commit** runs lint-staged on staged files
-- **commit-msg** rejects messages that are not [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `git commit -m "test dummy commit"` fails; use `feat: add counter page`)
+On every `git commit`:
 
-If you install dependencies before `git init`, `prepare` is a no-op. Run it again after `git init`.
+1. **pre-commit** runs `<%= packageManager === 'npm' ? 'npm run lint:fix && npm run format:fix' : packageManager === 'yarn' ? 'yarn lint:fix && yarn format:fix' : 'pnpm lint:fix && pnpm format:fix' %>`
+2. **commit-msg** checks Conventional Commits (e.g. `git commit -m "hello world"` fails; use `feat: add counter page`)
+
+If a step fails, fix the reported issue and commit again.
 
 ## Environment variables
 

@@ -287,9 +287,8 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       break;
   }
 
-  // Git hooks — always included (Husky + lint-staged + commitlint)
+  // Git hooks — always included (Husky + commitlint)
   devDependencies['husky'] = '^9.1.7';
-  devDependencies['lint-staged'] = '^15.5.0';
   devDependencies['@commitlint/cli'] = '^19.8.0';
   devDependencies['@commitlint/config-conventional'] = '^19.8.0';
 
@@ -344,9 +343,11 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     }
     const joined = prettierGlobs.join(' ');
     scripts.format = `prettier --write ${joined}`;
+    scripts['format:fix'] = scripts.format;
     scripts['format:check'] = `prettier --check ${joined}`;
   } else if (answers.linting === 'biome') {
     scripts.format = 'biome format --write .';
+    scripts['format:fix'] = scripts.format;
     scripts['format:check'] = 'biome format .';
   }
 

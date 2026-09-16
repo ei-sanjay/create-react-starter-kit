@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-# Husky adds node_modules/.bin to PATH. Pin the config file so lint-staged
-# never reads a nested dependency package.json (e.g. cac).
-lint-staged --config lint-staged.config.mjs

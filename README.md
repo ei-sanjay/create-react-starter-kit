@@ -21,7 +21,7 @@ npx create-react-starter-kit
 create-react-starter-kit
 ```
 
-Answer questions one by one (build tool, router, state, data fetching, forms, styling, testing, and more). Press **Enter** to accept each default. Every project is **TypeScript** and includes **Husky + lint-staged + commitlint**, a **feature-based** folder layout, and **`@/` path aliases**.
+Answer questions one by one (build tool, router, state, data fetching, forms, styling, testing, and more). Press **Enter** to accept each default. Every project is **TypeScript** and includes **Husky + commitlint**, a **feature-based** folder layout, and **`@/` path aliases**.
 
 ### Non-interactive defaults
 
@@ -44,7 +44,7 @@ create-react-starter-kit -y --name my-app --dir ./apps/my-app --skip-install
 - Real examples for selected state, data fetching, forms, validation, UI, and API layers
 - `docs/` with architecture, getting started, best practices, and stack notes
 - Tooling configs (Vite/Webpack/Rsbuild, ESLint/Biome, Prettier, tests, etc.)
-- Husky pre-commit (lint-staged) + commit-msg (commitlint / Conventional Commits)
+- Husky pre-commit (`lint:fix` + `format:fix`) + commit-msg (commitlint / Conventional Commits)
 - Feature-based `src/` layout + `@/` path aliases (tsconfig + bundler)
 - `README.md` tailored to the selected stack
 

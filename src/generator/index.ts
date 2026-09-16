@@ -207,7 +207,7 @@ export function getStackLabels(answers: ProjectAnswers): Record<string, string> 
     apiLayer: map.apiLayer[answers.apiLayer],
     packageManager: map.packageManager[answers.packageManager],
     errorTracking: map.errorTracking[answers.errorTracking],
-    gitHooks: 'Husky + lint-staged + commitlint',
+    gitHooks: 'Husky + commitlint',
     folderPattern: 'Feature-based (domain-driven)',
   };
 }
