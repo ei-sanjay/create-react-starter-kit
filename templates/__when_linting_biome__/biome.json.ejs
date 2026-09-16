@@ -1,3 +1,30 @@
+<%
+  const unknownAtRules = [];
+  if (styling === 'tailwind' || uiLibrary === 'shadcn') {
+    unknownAtRules.push('tailwind', 'apply');
+  }
+  if (styling === 'sass') {
+    unknownAtRules.push(
+      'use',
+      'forward',
+      'mixin',
+      'include',
+      'function',
+      'extend',
+      'error',
+      'warn',
+      'debug',
+      'at-root',
+      'each',
+      'for',
+      'if',
+      'else',
+      'while',
+      'content',
+      'return',
+    );
+  }
+-%>
 {
   "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "files": {
@@ -36,15 +63,15 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended"<% if (unknownAtRules.length) { %>,
       "suspicious": {
         "noUnknownAtRules": {
           "level": "error",
           "options": {
-            "ignore": ["tailwind"]
+            "ignore": <%- JSON.stringify(unknownAtRules) %>
           }
         }
-      }
+      }<% } %>
     },
     "domains": {
       "react": "recommended",
@@ -66,8 +93,8 @@
   },
   "css": {
     "parser": {
-      "tailwindDirectives": true,
-      "cssModules": true
+      "tailwindDirectives": <%= styling === 'tailwind' || uiLibrary === 'shadcn' %>,
+      "cssModules": <%= styling === 'css-modules' %>
     }
   },
   "overrides": [

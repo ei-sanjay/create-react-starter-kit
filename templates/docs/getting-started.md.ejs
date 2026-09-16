@@ -45,6 +45,21 @@ Useful scripts:
 | `storybook` | Component explorer |
 <% } -%>
 | `lint` / `format` | Code quality |
+| `prepare` | Install Husky git hooks (run after `git init`) |
+
+## Git hooks
+
+Husky + lint-staged + commitlint are included by default.
+
+```bash
+git init
+<%= packageManager === 'npm' ? 'npm run prepare' : packageManager === 'yarn' ? 'yarn prepare' : 'pnpm prepare' %>
+```
+
+- **pre-commit** runs lint-staged on staged files
+- **commit-msg** rejects messages that are not [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `git commit -m "test dummy commit"` fails; use `feat: add counter page`)
+
+If you install dependencies before `git init`, `prepare` is a no-op. Run it again after `git init`.
 
 ## Environment variables
 

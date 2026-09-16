@@ -33,7 +33,8 @@
 <% } -%>
 - **Import order** (same for Biome and ESLint): npm packages → blank line → `@/` / relative → blank line → styles last
 - Run lint before push; treat warnings as debt with a burn-down plan.
-- Husky + lint-staged formats staged files so diffs stay clean.
+- Husky + lint-staged formats staged files so diffs stay clean (`lint-staged.config.mjs`).
+- After `git init`, run `<%= packageManager === 'npm' ? 'npm run prepare' : packageManager === 'yarn' ? 'yarn prepare' : 'pnpm prepare' %>` so hooks are installed.
 - commitlint enforces Conventional Commits on `git commit`.
 
 **Commit style examples**

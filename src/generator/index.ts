@@ -385,37 +385,6 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     // Keep npm as the package manager without forcing a monorepo layout.
   }
 
-  const eslintTsFix = ['eslint --fix', 'prettier --write'];
-  pkg['lint-staged'] = {
-    [`src/**/*.{ts,tsx}`]:
-      answers.linting === 'biome'
-        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : eslintTsFix,
-    [`src/**/*.{css,scss,md,json}`]:
-      answers.linting === 'biome'
-        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : ['prettier --write'],
-    [`tests/**/*.{ts,tsx}`]:
-      answers.linting === 'biome'
-        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : eslintTsFix,
-    'docs/**/*.md':
-      answers.linting === 'biome'
-        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : ['prettier --write'],
-    '*.{json,md}':
-      answers.linting === 'biome'
-        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : ['prettier --write'],
-  };
-
-  // Drop empty lint-staged entries
-  pkg['lint-staged'] = Object.fromEntries(
-    Object.entries(pkg['lint-staged'] as Record<string, string[]>).filter(
-      ([, cmds]) => cmds.length > 0,
-    ),
-  );
-
   await fs.writeJson(path.join(answers.targetDir, 'package.json'), pkg, {
     spaces: 2,
   });
@@ -442,6 +411,13 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
 
   for (const dir of dirs) {
     await fs.ensureDir(path.join(answers.targetDir, dir));
+  }
+
+  for (const hook of ['.husky/pre-commit', '.husky/commit-msg']) {
+    const hookPath = path.join(answers.targetDir, hook);
+    if (await fs.pathExists(hookPath)) {
+      await fs.chmod(hookPath, 0o755);
+    }
   }
 
   spinner.succeed('Project files generated');
@@ -501,6 +477,7 @@ export function printSuccess(answers: ProjectAnswers): void {
     console.log(`  ${installCmd}`);
   }
   console.log(`  ${devCmd}`);
+  console.log(`  git init && ${pm === 'npm' ? 'npm run prepare' : pm === 'yarn' ? 'yarn prepare' : 'pnpm prepare'}`);
   logger.blank();
   logger.dim('Documentation: docs/getting-started.md');
   logger.blank();

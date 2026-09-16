@@ -377,8 +377,7 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     scripts.chromatic = 'chromatic --exit-zero-on-changes';
   }
 
-  scripts.prepare =
-    'node -e "try{require(\'fs\').accessSync(\'.git\');require(\'child_process\').execSync(\'husky\',{stdio:\'inherit\'})}catch(e){}"';
+  scripts.prepare = 'node scripts/prepare-husky.mjs';
 
   // silence unused
   void entry;
