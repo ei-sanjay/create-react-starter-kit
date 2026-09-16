@@ -261,7 +261,8 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       devDependencies['typescript-eslint'] = '^8.26.1';
     }
   } else {
-    devDependencies['@biomejs/biome'] = '^1.9.4';
+    // Pin exact (Biome recommendation) so organizeImports groups stay stable.
+    devDependencies['@biomejs/biome'] = '2.5.5';
   }
 
   // API

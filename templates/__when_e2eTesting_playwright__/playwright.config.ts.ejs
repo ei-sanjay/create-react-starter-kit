@@ -8,11 +8,19 @@ import { defineConfig, devices } from '@playwright/test';
  * - Webpack → 3000
  * - Rsbuild → 8080
  *
- * Distinct ports per bundler (see rsbuild.config / webpack.config / vite.config).
- * Playwright always runs `pnpm dev` (or npm/yarn) for this project — it does not
- * reuse another app that happens to be listening on the same port.
+ * Locally, reuse an already-running server on the matching port (same as previous
+ * working behavior). In CI always start a fresh server.
+ * Bundlers use host 127.0.0.1 + strictPort so Playwright never waits forever on
+ * a different auto-picked port.
  */
 <% const e2ePort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
+<% const webServerCommand =
+  buildTool === 'webpack'
+    ? 'npx webpack serve --mode development --host 127.0.0.1 --port 3000'
+    : buildTool === 'rsbuild'
+      ? 'npx rsbuild dev --host 127.0.0.1 --port 8080'
+      : 'npx vite --host 127.0.0.1 --port 5173 --strictPort';
+-%>
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -25,15 +33,9 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   webServer: {
-    // Always boot THIS project's dev server — never attach to another app on the same port.
-    command:
-      '<%= packageManager === 'npm'
-        ? 'npm run dev'
-        : packageManager === 'yarn'
-          ? 'yarn dev'
-          : 'pnpm dev' %>',
+    command: '<%= webServerCommand %>',
     url: 'http://127.0.0.1:<%= e2ePort %>',
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

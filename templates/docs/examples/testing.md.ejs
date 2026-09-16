@@ -30,6 +30,8 @@
 ```
 
 E2E base URL: `http://127.0.0.1:<%= buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173 %>`
+
+Playwright starts the bundler on that host/port (or reuses a local server already listening there). Keep only this project on that port while running e2e.
 <% } else if (e2eTesting === 'cypress') { -%>
 ```bash
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e

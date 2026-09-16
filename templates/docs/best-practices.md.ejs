@@ -24,14 +24,14 @@
 ## Linting & formatting
 
 <% if (linting === 'biome') { -%>
-- Tooling: **Biome** (lint + format in one tool)
-- `lint` runs `biome check`; `format` runs `biome format --write`
+- Tooling: **Biome 2.5.5** (lint + format + import organize)
+- `lint` runs `biome check`; `lint:fix` / `format` rewrite imports and formatting
 <% } else { -%>
 - Tooling: **ESLint + Prettier**
 - ESLint for code quality; Prettier for consistent formatting (`eslint-config-prettier` disables conflicting rules)
-- `lint:fix` runs `eslint src --fix` to auto-sort imports and apply safe fixes
+- `lint:fix` runs `eslint src tests --fix` to auto-sort imports and apply safe fixes
 <% } -%>
-- **Import order** (enforced by Biome and ESLint): npm packages → blank line → `@/` and relative paths → blank line → styles (`.css` / `.scss`) last
+- **Import order** (same for Biome and ESLint): npm packages → blank line → `@/` / relative → blank line → styles last
 - Run lint before push; treat warnings as debt with a burn-down plan.
 - Husky + lint-staged formats staged files so diffs stay clean.
 - commitlint enforces Conventional Commits on `git commit`.
