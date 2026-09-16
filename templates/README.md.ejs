@@ -45,7 +45,8 @@ npm run dev
 <% } -%>
 ```
 
-Open the URL printed in the terminal (typically `http://localhost:<%= buildTool === 'webpack' || buildTool === 'rsbuild' ? 3000 : 5173 %>`).
+<% const devPort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
+Open the URL printed in the terminal (typically `http://localhost:<%= devPort %>`).
 
 ## Environment setup
 

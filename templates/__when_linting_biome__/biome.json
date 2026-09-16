@@ -8,10 +8,14 @@
       "coverage",
       "storybook-static",
       "playwright-report",
-      "test-results"
+      "test-results",
+      ".husky",
+      "public"
     ]
   },
-  "organizeImports": { "enabled": true },
+  "organizeImports": {
+    "enabled": true
+  },
   "linter": {
     "enabled": true,
     "rules": {

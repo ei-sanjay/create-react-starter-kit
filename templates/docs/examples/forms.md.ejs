@@ -24,7 +24,7 @@ Multi-field input with client-side rules and async submit:
 <% } else { -%>
    - `createFeedback()` from `@/services/api`
 <% } -%>
-4. Show success with `role="status"` and reset the form.
+4. Show success with `data-testid="feedback-success"` (and `aria-live="polite"`) and reset the form.
 
 <% if (forms === 'react-hook-form') { -%>
 ### React Hook Form pattern
@@ -69,7 +69,7 @@ Keep values in `useState`, run the schema/validator on submit, then call the API
 ## Testing tips
 
 - Assert validation messages for empty submit.
-- Mock the network boundary (API helper or RTK mutation) and assert the success status region.
+- Mock the network boundary (API helper or RTK mutation) and assert `data-testid="feedback-success"`.
 - Prefer `userEvent` over `fireEvent` for realistic typing.
 
 ## Related

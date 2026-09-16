@@ -9,6 +9,62 @@ import { createSpinner, logger } from '../utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function resolveBiomeCli(): string {
+  const candidates = [
+    path.resolve(__dirname, '../../node_modules/@biomejs/biome/bin/biome'),
+    path.resolve(__dirname, '../node_modules/@biomejs/biome/bin/biome'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return 'biome';
+}
+
+async function fixImportsWithEslint(
+  targetDir: string,
+  packageManager: ProjectAnswers['packageManager'],
+): Promise<void> {
+  const fixSpinner = createSpinner('Applying ESLint import order...');
+  fixSpinner.start();
+  try {
+    if (packageManager === 'pnpm') {
+      await execa('pnpm', ['exec', 'eslint', 'src', 'tests', '--fix'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    } else if (packageManager === 'yarn') {
+      await execa('yarn', ['eslint', 'src', 'tests', '--fix'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    } else {
+      await execa('npx', ['eslint', 'src', 'tests', '--fix'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    }
+    fixSpinner.succeed('ESLint import order applied');
+  } catch {
+    fixSpinner.warn('ESLint fix skipped — run `pnpm lint:fix` after install.');
+  }
+}
+
+async function formatGeneratedProjectWithBiome(targetDir: string): Promise<void> {
+  const formatSpinner = createSpinner('Applying Biome formatting...');
+  formatSpinner.start();
+  try {
+    await execa(resolveBiomeCli(), ['check', '--write', '.'], {
+      cwd: targetDir,
+      stdio: 'pipe',
+    });
+    formatSpinner.succeed('Biome formatting applied');
+  } catch {
+    formatSpinner.warn('Biome format skipped — run `pnpm lint:fix` after install.');
+  }
+}
+
 function getTemplatesRoot(): string {
   // dist/generator -> ../../templates or ../templates depending on layout
   const candidates = [
@@ -329,15 +385,20 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     // Keep npm as the package manager without forcing a monorepo layout.
   }
 
+  const eslintTsFix = ['eslint --fix', 'prettier --write'];
   pkg['lint-staged'] = {
-    [`src/**/*.{ts,tsx,css,scss,md,json}`]:
+    [`src/**/*.{ts,tsx}`]:
+      answers.linting === 'biome'
+        ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
+        : eslintTsFix,
+    [`src/**/*.{css,scss,md,json}`]:
       answers.linting === 'biome'
         ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
         : ['prettier --write'],
     [`tests/**/*.{ts,tsx}`]:
       answers.linting === 'biome'
         ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
-        : ['prettier --write'],
+        : eslintTsFix,
     'docs/**/*.md':
       answers.linting === 'biome'
         ? ['biome check --write --files-ignore-unknown=true --no-errors-on-unmatched']
@@ -385,6 +446,10 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
 
   spinner.succeed('Project files generated');
 
+  if (answers.linting === 'biome') {
+    await formatGeneratedProjectWithBiome(answers.targetDir);
+  }
+
   if (answers.installDependencies) {
     const installSpinner = createSpinner(
       `Installing dependencies with ${answers.packageManager}...`,
@@ -408,6 +473,13 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
       installSpinner.warn(
         `Could not install with ${answers.packageManager}. Run install manually.`,
       );
+    }
+
+    const eslintReady = await fs.pathExists(
+      path.join(answers.targetDir, 'node_modules/eslint/package.json'),
+    );
+    if (answers.linting === 'eslint' && eslintReady) {
+      await fixImportsWithEslint(answers.targetDir, answers.packageManager);
     }
   }
 }

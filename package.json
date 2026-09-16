@@ -1,6 +1,6 @@
 {
   "name": "create-react-starter-kit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Interactive CLI to scaffold a production-ready React app with your preferred stack",
   "keywords": [
     "react",
@@ -36,6 +36,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@biomejs/biome": "^1.9.4",
     "chalk": "^5.4.1",
     "ejs": "^3.1.10",
     "execa": "^9.5.2",

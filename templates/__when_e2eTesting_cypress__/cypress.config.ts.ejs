@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress';
 
-<% const e2ePort = buildTool === 'webpack' || buildTool === 'rsbuild' ? 3000 : 5173; -%>
+<% const e2ePort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
 export default defineConfig({
   e2e: {
     baseUrl: 'http://127.0.0.1:<%= e2ePort %>',

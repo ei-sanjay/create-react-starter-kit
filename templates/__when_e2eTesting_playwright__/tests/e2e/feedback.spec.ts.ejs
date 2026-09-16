@@ -14,7 +14,7 @@ test.describe('Feedback page', () => {
     await page.getByPlaceholder('ada@example.com').fill('ada@example.com');
     await page.getByPlaceholder('What should we improve?').fill('Please add more examples for routing.');
     await page.getByRole('button', { name: /Send feedback/i }).click();
-    await expect(page.getByRole('status')).toContainText(/submitted successfully/i, {
+    await expect(page.getByTestId('feedback-success')).toContainText(/submitted successfully/i, {
       timeout: 15_000,
     });
   });

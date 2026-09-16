@@ -29,7 +29,9 @@
 <% } else { -%>
 - Tooling: **ESLint + Prettier**
 - ESLint for code quality; Prettier for consistent formatting (`eslint-config-prettier` disables conflicting rules)
+- `lint:fix` runs `eslint src --fix` to auto-sort imports and apply safe fixes
 <% } -%>
+- **Import order** (enforced by Biome and ESLint): npm packages → blank line → `@/` and relative paths → blank line → styles (`.css` / `.scss`) last
 - Run lint before push; treat warnings as debt with a burn-down plan.
 - Husky + lint-staged formats staged files so diffs stay clean.
 - commitlint enforces Conventional Commits on `git commit`.
@@ -75,7 +77,7 @@ Aim for: fast unit tests on logic, fewer integration tests on features, thin e2e
 
 - Prefer semantic HTML (`button`, `label`, `nav`) before ARIA.
 - Ensure keyboard focus order matches visual order.
-- Pair every input with a visible label; surface errors with `aria-live` / `role="status"` where appropriate.
+- Pair every input with a visible label; surface async success/errors with `aria-live` and a stable `data-testid` for tests.
 
 ## Deployment notes
 

@@ -59,7 +59,7 @@ describe('FeedbackForm', () => {
 
     await waitFor(() => {
       expect(createFeedback).toHaveBeenCalled();
-      expect(screen.getByRole('status')).toHaveTextContent(/submitted successfully/i);
+      expect(screen.getByTestId('feedback-success')).toHaveTextContent(/submitted successfully/i);
     });
   });
 });

@@ -1,6 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+<% if (serverState === 'rtk-query') { -%>
+import { screen } from '@testing-library/react';
+<% } else { -%>
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+<% } -%>
 import { PostsPanel } from '@/features/posts/PostsPanel';
 import { renderWithProviders } from './test-utils';
 

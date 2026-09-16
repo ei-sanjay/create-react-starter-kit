@@ -253,6 +253,8 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
     devDependencies['globals'] = '^16.0.0';
     devDependencies['eslint-plugin-react'] = '^7.37.4';
     devDependencies['eslint-plugin-react-hooks'] = '^5.2.0';
+    devDependencies['eslint-plugin-import'] = '^2.31.0';
+    devDependencies['eslint-import-resolver-typescript'] = '^3.7.0';
     devDependencies['eslint-config-prettier'] = '^10.1.1';
     devDependencies['prettier'] = '^3.5.3';
     if (isTs) {
@@ -317,9 +319,8 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
   }
 
   if (answers.linting === 'eslint') {
-    scripts.lint = isTs
-      ? 'eslint src --ext .ts,.tsx'
-      : 'eslint src --ext .js,.jsx';
+    scripts.lint = 'eslint src tests';
+    scripts['lint:fix'] = 'eslint src tests --fix';
   } else {
     scripts.lint = 'biome check .';
     scripts['lint:fix'] = 'biome check --write .';
@@ -375,7 +376,8 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     scripts.chromatic = 'chromatic --exit-zero-on-changes';
   }
 
-  scripts.prepare = 'husky';
+  scripts.prepare =
+    'node -e "try{require(\'fs\').accessSync(\'.git\');require(\'child_process\').execSync(\'husky\',{stdio:\'inherit\'})}catch(e){}"';
 
   // silence unused
   void entry;
