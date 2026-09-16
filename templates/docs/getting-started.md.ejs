@@ -14,16 +14,21 @@ This guide walks you from first install to extending the app with confidence.
 
 ```bash
 <% if (packageManager === 'pnpm') { -%>
+git init
 pnpm install
 pnpm dev
 <% } else if (packageManager === 'yarn') { -%>
-yarn
+git init
+yarn install
 yarn dev
 <% } else { -%>
+git init
 npm install
 npm run dev
 <% } -%>
 ```
+
+Install **must** run after `git init`. The `prepare` script (`husky`) only creates git hooks when a `.git` directory already exists.
 
 <% const devPort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
 Dev server URL (default): **http://localhost:<%= devPort %>**
@@ -45,23 +50,16 @@ Useful scripts:
 | `storybook` | Component explorer |
 <% } -%>
 | `lint` / `format` | Code quality |
-| `prepare` | Install Husky git hooks (run after `git init`) |
 
 ## Git hooks
 
-Husky + commitlint are included by default.
+| Hook | What it runs |
+|------|----------------|
+| `pre-commit` | `lint-staged` |
+| `commit-msg` | commitlint (Conventional Commits) |
+| `pre-push` | `<%= packageManager === 'npm' ? 'npm run test' : packageManager === 'yarn' ? 'yarn run test' : 'pnpm run test' %>` |
 
-```bash
-git init
-<%= packageManager === 'npm' ? 'npm run prepare' : packageManager === 'yarn' ? 'yarn prepare' : 'pnpm prepare' %>
-```
-
-On every `git commit`:
-
-1. **pre-commit** runs `<%= packageManager === 'npm' ? 'npm run lint:fix && npm run format:fix' : packageManager === 'yarn' ? 'yarn lint:fix && yarn format:fix' : 'pnpm lint:fix && pnpm format:fix' %>`
-2. **commit-msg** checks Conventional Commits (e.g. `git commit -m "hello world"` fails; use `feat: add counter page`)
-
-If a step fails, fix the reported issue and commit again.
+After `git init`, run `<%= packageManager === 'npm' ? 'npm install' : packageManager === 'yarn' ? 'yarn install' : 'pnpm install' %>` so Husky can install those hooks.
 
 ## Environment variables
 

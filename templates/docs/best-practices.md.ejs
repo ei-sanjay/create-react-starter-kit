@@ -33,17 +33,8 @@
 <% } -%>
 - **Import order** (same for Biome and ESLint): npm packages → blank line → `@/` / relative → blank line → styles last
 - Run lint before push; treat warnings as debt with a burn-down plan.
-- Husky **pre-commit** runs `lint:fix` then `format:fix`. If either fails, the commit is blocked.
-- After `git init`, run `<%= packageManager === 'npm' ? 'npm run prepare' : packageManager === 'yarn' ? 'yarn prepare' : 'pnpm prepare' %>` so hooks are installed.
-- Husky **commit-msg** runs commitlint (Conventional Commits).
-
-**Commit style examples**
-
-```text
-feat(posts): add pagination to posts query
-fix(feedback): surface API validation errors
-chore(deps): bump testing-library
-```
+- Husky **pre-commit** runs lint-staged; **commit-msg** runs commitlint; **pre-push** runs `<%= packageManager === 'npm' ? 'npm run test' : packageManager === 'yarn' ? 'yarn run test' : 'pnpm run test' %>`.
+- After `git init`, run `<%= packageManager === 'npm' ? 'npm install' : packageManager === 'yarn' ? 'yarn install' : 'pnpm install' %>` so the `prepare` script can install Husky hooks.
 
 ## Environment variables
 

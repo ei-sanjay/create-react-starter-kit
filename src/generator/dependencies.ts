@@ -287,8 +287,9 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       break;
   }
 
-  // Git hooks — always included (Husky + commitlint)
+  // Git hooks — Husky + lint-staged + commitlint
   devDependencies['husky'] = '^9.1.7';
+  devDependencies['lint-staged'] = '^15.5.0';
   devDependencies['@commitlint/cli'] = '^19.8.0';
   devDependencies['@commitlint/config-conventional'] = '^19.8.0';
 
@@ -360,6 +361,9 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
       scripts.test = 'jest';
       scripts['test:watch'] = 'jest --watch';
       break;
+    default:
+      scripts.test = 'node -e "console.log(\'No unit tests configured\')"';
+      break;
   }
 
   if (answers.e2eTesting === 'playwright') {
@@ -378,7 +382,7 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     scripts.chromatic = 'chromatic --exit-zero-on-changes';
   }
 
-  scripts.prepare = 'node scripts/prepare-husky.mjs';
+  scripts.prepare = 'husky';
 
   // silence unused
   void entry;

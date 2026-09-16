@@ -1,0 +1,7 @@
+<% if (packageManager === 'npm') { -%>
+npm run test
+<% } else if (packageManager === 'yarn') { -%>
+yarn run test
+<% } else { -%>
+pnpm run test
+<% } -%>

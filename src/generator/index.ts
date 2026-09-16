@@ -207,7 +207,7 @@ export function getStackLabels(answers: ProjectAnswers): Record<string, string> 
     apiLayer: map.apiLayer[answers.apiLayer],
     packageManager: map.packageManager[answers.packageManager],
     errorTracking: map.errorTracking[answers.errorTracking],
-    gitHooks: 'Husky + commitlint',
+    gitHooks: 'Husky + lint-staged + commitlint',
     folderPattern: 'Feature-based (domain-driven)',
   };
 }
@@ -385,6 +385,21 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     // Keep npm as the package manager without forcing a monorepo layout.
   }
 
+  pkg['lint-staged'] =
+    answers.linting === 'biome'
+      ? {
+          '*.{js,jsx,ts,tsx,cjs,mjs}': [
+            'biome check --write --files-ignore-unknown=true --no-errors-on-unmatched',
+          ],
+          '*.{css,scss,md,json}': [
+            'biome check --write --files-ignore-unknown=true --no-errors-on-unmatched',
+          ],
+        }
+      : {
+          '*.{js,jsx,ts,tsx,cjs,mjs}': ['eslint --fix', 'prettier --write'],
+          '*.{css,scss,md,json}': ['prettier --write'],
+        };
+
   await fs.writeJson(path.join(answers.targetDir, 'package.json'), pkg, {
     spaces: 2,
   });
@@ -413,7 +428,7 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     await fs.ensureDir(path.join(answers.targetDir, dir));
   }
 
-  for (const hook of ['.husky/pre-commit', '.husky/commit-msg']) {
+  for (const hook of ['.husky/pre-commit', '.husky/commit-msg', '.husky/pre-push']) {
     const hookPath = path.join(answers.targetDir, hook);
     if (await fs.pathExists(hookPath)) {
       await fs.chmod(hookPath, 0o755);
@@ -426,7 +441,18 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     await formatGeneratedProjectWithBiome(answers.targetDir);
   }
 
+  // Husky's `prepare` script only installs hooks when `.git` already exists.
+  // git init MUST run before the package-manager install.
   if (answers.installDependencies) {
+    const gitSpinner = createSpinner('Initializing git repository...');
+    gitSpinner.start();
+    try {
+      await execa('git', ['init'], { cwd: answers.targetDir, stdio: 'pipe' });
+      gitSpinner.succeed('Git repository initialized');
+    } catch {
+      gitSpinner.warn('git init skipped — run git init, then install, so Husky can attach hooks.');
+    }
+
     const installSpinner = createSpinner(
       `Installing dependencies with ${answers.packageManager}...`,
     );
@@ -438,16 +464,15 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
           : answers.packageManager === 'yarn'
             ? 'yarn'
             : 'pnpm';
-      const args =
-        answers.packageManager === 'yarn' ? [] : ['install'];
-      await execa(command, args.length ? args : ['install'], {
+      const args = ['install'];
+      await execa(command, args, {
         cwd: answers.targetDir,
         stdio: 'pipe',
       });
-      installSpinner.succeed('Dependencies installed');
+      installSpinner.succeed('Dependencies installed (Husky hooks via prepare)');
     } catch {
       installSpinner.warn(
-        `Could not install with ${answers.packageManager}. Run install manually.`,
+        `Could not install with ${answers.packageManager}. Run install after git init so Husky can set up hooks.`,
       );
     }
 
@@ -466,7 +491,7 @@ export function printSuccess(answers: ProjectAnswers): void {
   const devCmd =
     pm === 'npm' ? 'npm run dev' : pm === 'yarn' ? 'yarn dev' : 'pnpm dev';
   const installCmd =
-    pm === 'npm' ? 'npm install' : pm === 'yarn' ? 'yarn' : 'pnpm install';
+    pm === 'npm' ? 'npm install' : pm === 'yarn' ? 'yarn install' : 'pnpm install';
 
   logger.blank();
   logger.success(`Created ${answers.projectName} at ${relative}`);
@@ -474,10 +499,10 @@ export function printSuccess(answers: ProjectAnswers): void {
   logger.info('Next steps:');
   console.log(`  cd ${relative}`);
   if (!answers.installDependencies) {
-    console.log(`  ${installCmd}`);
+    console.log('  git init');
+    console.log(`  ${installCmd}   # required after git init so Husky can install hooks`);
   }
   console.log(`  ${devCmd}`);
-  console.log(`  git init && ${pm === 'npm' ? 'npm run prepare' : pm === 'yarn' ? 'yarn prepare' : 'pnpm prepare'}`);
   logger.blank();
   logger.dim('Documentation: docs/getting-started.md');
   logger.blank();

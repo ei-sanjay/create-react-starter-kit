@@ -2,35 +2,55 @@
 node_modules/
 .pnp
 .pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Build
+# Build / output
 dist/
 build/
+out/
 .cache/
+.parcel-cache/
 .rsbuild/
+.turbo/
+*.tsbuildinfo
 
-# Env
+# Env files (keep examples)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Logs / coverage
+# Logs
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test / coverage
 coverage/
 playwright-report/
+playwright/.cache/
 test-results/
 cypress/videos/
 cypress/screenshots/
-
-# IDE / OS
-.DS_Store
-.idea/
-.vscode/*
-!.vscode/extensions.json
+cypress/downloads/
 
 # Storybook
 storybook-static/
 
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
 # Misc
-*.tsbuildinfo
-.turbo/
+*.local
+.eslintcache
+.stylelintcache

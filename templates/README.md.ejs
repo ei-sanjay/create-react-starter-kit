@@ -27,26 +27,43 @@ This app ships with a curated stack chosen during scaffolding, a working demo pa
 | API layer | <%= stackLabels.apiLayer %> |
 | Package manager | <%= stackLabels.packageManager %> |
 | Error tracking | <%= stackLabels.errorTracking %> |
-| Git hooks | Husky + commitlint |
+| Git hooks | Husky + lint-staged + commitlint |
 | Structure | Feature-based (domain-driven) + `@/` aliases |
 
 ## Quick start
 
 ```bash
 <% if (packageManager === 'pnpm') { -%>
+git init
 pnpm install
 pnpm dev
 <% } else if (packageManager === 'yarn') { -%>
-yarn
+git init
+yarn install
 yarn dev
 <% } else { -%>
+git init
 npm install
 npm run dev
 <% } -%>
 ```
 
+`<% if (packageManager === 'pnpm') { %>pnpm install<% } else if (packageManager === 'yarn') { %>yarn install<% } else { %>npm install<% } %>` **must run after `git init`**. Husky installs git hooks from the `prepare` script during install, and that only works when `.git` already exists.
+
 <% const devPort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
 Open the URL printed in the terminal (typically `http://localhost:<%= devPort %>`).
+
+## Git hooks
+
+This project includes Husky hooks:
+
+| Hook | Command |
+|------|---------|
+| `pre-commit` | `lint-staged` (<% if (linting === 'biome') { %>Biome<% } else { %>ESLint + Prettier<% } %> on staged files) |
+| `commit-msg` | commitlint (Conventional Commits, e.g. `feat: add counter page`) |
+| `pre-push` | `<%= packageManager === 'npm' ? 'npm run test' : packageManager === 'yarn' ? 'yarn run test' : 'pnpm run test' %>` |
+
+If you clone or re-init git later, run install again so `prepare` can attach hooks.
 
 ## Environment setup
 
