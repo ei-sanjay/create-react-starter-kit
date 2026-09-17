@@ -1,4 +1,8 @@
+<% if (unitTesting === 'vitest') { -%>
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+<% } else { -%>
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+<% } -%>
 <% if (serverState === 'rtk-query') { -%>
 import { screen } from '@testing-library/react';
 <% } else { -%>
@@ -9,6 +13,7 @@ import { PostsPanel } from '@/features/posts/PostsPanel';
 import { renderWithProviders } from './test-utils';
 
 <% if (serverState !== 'rtk-query') { -%>
+<% if (unitTesting === 'vitest') { -%>
 vi.mock('@/services/api', async (importOriginal) => {
   const actual = await importOriginal<% if (isTypeScript) { %><typeof import('@/services/api')><% } %>();
   return {
@@ -19,11 +24,27 @@ vi.mock('@/services/api', async (importOriginal) => {
     ]),
   };
 });
+<% } else { -%>
+jest.mock('@/services/api', () => {
+  const actual = jest.requireActual('@/services/api')<% if (isTypeScript) { %> as typeof import('@/services/api')<% } %>;
+  return {
+    ...actual,
+    fetchPosts: jest.fn(async () => [
+      { userId: 1, id: 1, title: 'Alpha post', body: 'body-1' },
+      { userId: 1, id: 2, title: 'Beta post', body: 'body-2' },
+    ]),
+  };
+});
+<% } -%>
 <% } -%>
 
 describe('PostsPanel', () => {
   beforeEach(() => {
+<% if (unitTesting === 'vitest') { -%>
     vi.clearAllMocks();
+<% } else { -%>
+    jest.clearAllMocks();
+<% } -%>
   });
 
 <% if (serverState === 'rtk-query') { -%>

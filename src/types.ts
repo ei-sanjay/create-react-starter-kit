@@ -15,7 +15,7 @@ export type UiLibrary =
   | 'none';
 export type UnitTesting = 'vitest' | 'jest' | 'none';
 export type E2ETesting = 'playwright' | 'cypress' | 'none';
-export type VisualTesting = 'storybook' | 'chromatic' | 'none';
+export type VisualTesting = 'storybook' | 'none';
 export type Linting = 'eslint' | 'biome';
 export type Formatting = 'prettier' | 'none';
 export type ApiLayer = 'axios' | 'fetch' | 'none';

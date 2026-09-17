@@ -185,7 +185,6 @@ export async function collectAnswers(): Promise<ProjectAnswers> {
       message: 'Component Dev / Visual Testing?',
       choices: [
         { name: 'Storybook', value: 'storybook' },
-        { name: 'Chromatic', value: 'chromatic' },
         { name: 'None', value: 'none' },
       ],
       default: 'storybook',

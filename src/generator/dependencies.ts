@@ -199,13 +199,16 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
     case 'jest':
       devDependencies['jest'] = '^29.7.0';
       devDependencies['jest-environment-jsdom'] = '^29.7.0';
+      devDependencies['whatwg-fetch'] = '^3.6.20';
       // RTL is the component-testing layer; Jest/Vitest are runners — always pair them.
       devDependencies['@testing-library/react'] = '^16.2.0';
       devDependencies['@testing-library/jest-dom'] = '^6.6.3';
       devDependencies['@testing-library/user-event'] = '^14.6.1';
       if (isTs) {
         devDependencies['ts-jest'] = '^29.2.6';
+        devDependencies['ts-jest-mock-import-meta'] = '^1.2.1';
         devDependencies['@types/jest'] = '^29.5.14';
+        devDependencies['@types/node'] = '^22.13.10';
       }
       break;
   }
@@ -239,9 +242,6 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
         devDependencies['@storybook/addon-webpack5-compiler-babel'] = '^3.0.5';
       }
       devDependencies['@storybook/test'] = '^8.6.4';
-      break;
-    case 'chromatic':
-      devDependencies['chromatic'] = '^11.27.0';
       break;
   }
 
@@ -372,14 +372,13 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     scripts['test:e2e:install'] = 'playwright install chromium';
   } else if (answers.e2eTesting === 'cypress') {
     scripts['test:e2e'] = 'cypress run';
+    scripts['test:e2e:install'] = 'cypress install';
     scripts['cypress:open'] = 'cypress open';
   }
 
   if (answers.visualTesting === 'storybook') {
     scripts.storybook = 'storybook dev -p 6006';
     scripts['build-storybook'] = 'storybook build';
-  } else if (answers.visualTesting === 'chromatic') {
-    scripts.chromatic = 'chromatic --exit-zero-on-changes';
   }
 
   scripts.prepare = 'husky';

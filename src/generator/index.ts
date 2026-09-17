@@ -51,6 +51,50 @@ async function fixImportsWithEslint(
   }
 }
 
+function e2eInstallCommand(packageManager: ProjectAnswers['packageManager']): string {
+  return packageManager === 'npm'
+    ? 'npm run test:e2e:install'
+    : `${packageManager} test:e2e:install`;
+}
+
+async function installCypressBinary(
+  targetDir: string,
+  packageManager: ProjectAnswers['packageManager'],
+): Promise<void> {
+  const cypressReady = await fs.pathExists(
+    path.join(targetDir, 'node_modules/cypress/package.json'),
+  );
+  if (!cypressReady) {
+    return;
+  }
+
+  const spinner = createSpinner('Installing Cypress binary...');
+  spinner.start();
+  try {
+    if (packageManager === 'pnpm') {
+      await execa('pnpm', ['exec', 'cypress', 'install'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    } else if (packageManager === 'yarn') {
+      await execa('yarn', ['cypress', 'install'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    } else {
+      await execa('npx', ['cypress', 'install'], {
+        cwd: targetDir,
+        stdio: 'pipe',
+      });
+    }
+    spinner.succeed('Cypress binary installed');
+  } catch {
+    spinner.warn(
+      `Cypress binary skipped — run \`${e2eInstallCommand(packageManager)}\` after install.`,
+    );
+  }
+}
+
 async function formatGeneratedProjectWithBiome(targetDir: string): Promise<void> {
   const formatSpinner = createSpinner('Applying Biome formatting...');
   formatSpinner.start();
@@ -156,7 +200,6 @@ function labelMap(): Record<string, Record<string, string>> {
     },
     visualTesting: {
       storybook: 'Storybook',
-      chromatic: 'Chromatic',
       none: 'None',
     },
     linting: {
@@ -255,6 +298,10 @@ function shouldIncludeTemplate(
   if (whenMatch) {
     const [, key, value] = whenMatch;
     const answerValue = answers[key as keyof ProjectAnswers];
+    // Shared unit tests ship for both Vitest and Jest.
+    if (key === 'unitTesting' && value === 'shared') {
+      return answers.unitTesting === 'vitest' || answers.unitTesting === 'jest';
+    }
     // shadcn/ui depends on Tailwind utilities even if another styling option was picked
     if (
       key === 'styling' &&
@@ -381,8 +428,12 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     devDependencies,
   };
 
-  if (answers.packageManager === 'npm') {
-    // Keep npm as the package manager without forcing a monorepo layout.
+  if (answers.packageManager === 'pnpm') {
+    const onlyBuiltDependencies = ['esbuild'];
+    if (answers.e2eTesting === 'cypress') {
+      onlyBuiltDependencies.push('cypress');
+    }
+    pkg.pnpm = { onlyBuiltDependencies };
   }
 
   pkg['lint-staged'] =
@@ -482,6 +533,10 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
     if (answers.linting === 'eslint' && eslintReady) {
       await fixImportsWithEslint(answers.targetDir, answers.packageManager);
     }
+
+    if (answers.e2eTesting === 'cypress') {
+      await installCypressBinary(answers.targetDir, answers.packageManager);
+    }
   }
 }
 
@@ -503,6 +558,9 @@ export function printSuccess(answers: ProjectAnswers): void {
     console.log(`  ${installCmd}   # required after git init so Husky can install hooks`);
   }
   console.log(`  ${devCmd}`);
+  if (answers.e2eTesting === 'playwright' || answers.e2eTesting === 'cypress') {
+    console.log(`  ${e2eInstallCommand(pm)}   # once, before e2e`);
+  }
   logger.blank();
   logger.dim('Documentation: docs/getting-started.md');
   logger.blank();

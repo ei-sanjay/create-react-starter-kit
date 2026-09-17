@@ -1,0 +1,59 @@
+/** @type {import('jest').Config} */
+module.exports = {
+  testEnvironment: 'jsdom',
+  testEnvironmentOptions: {
+    url: 'http://localhost/',
+  },
+  setupFiles: ['<rootDir>/tests/jest.polyfills.cjs'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.<%= ext %>'],
+  testMatch: ['**/tests/**/*.test.[jt]s?(x)'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/build/', '/tests/e2e/', '/e2e/'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|scss)$': '<rootDir>/tests/styleMock.<%= ext %>',
+  },
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        diagnostics: {
+          ignoreCodes: [1343],
+        },
+        tsconfig: {
+          target: 'ES2022',
+          module: 'commonjs',
+          jsx: 'react-jsx',
+          esModuleInterop: true,
+          isolatedModules: true,
+          skipLibCheck: true,
+          strict: true,
+          baseUrl: '.',
+          paths: {
+            '@/*': ['src/*'],
+          },
+        },
+        astTransformers: {
+          before: [
+            {
+              path: 'ts-jest-mock-import-meta',
+              options: {
+                metaObjectReplacement: {
+                  env: {
+                    MODE: 'test',
+                    VITE_API_BASE_URL: 'https://jsonplaceholder.typicode.com',
+                    VITE_SENTRY_DSN: '',
+                    VITE_BUGSNAG_API_KEY: '',
+                    VITE_LOGROCKET_APP_ID: '',
+                    VITE_DATADOG_APPLICATION_ID: '',
+                    VITE_DATADOG_CLIENT_TOKEN: '',
+                    VITE_DATADOG_SITE: 'datadoghq.com',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+};

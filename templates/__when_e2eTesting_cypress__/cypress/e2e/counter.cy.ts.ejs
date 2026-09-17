@@ -1,0 +1,24 @@
+import { ROUTES } from '../../src/config/routes';
+
+describe('Counter page', () => {
+<% if (stateManagement === 'none') { -%>
+  it('shows empty-state message when no state library is selected', () => {
+    cy.visit(ROUTES.COUNTER);
+    cy.contains(/Client state library was set to None/i).should('be.visible');
+  });
+<% } else { -%>
+  it('increments and decrements the counter', () => {
+    cy.visit(ROUTES.COUNTER);
+    cy.get('[data-testid="counter-value"]').should('have.text', '0');
+
+    cy.get('button[aria-label="Increment"]').click();
+    cy.get('[data-testid="counter-value"]').should('have.text', '1');
+
+    cy.get('button[aria-label="Increment"]').click();
+    cy.get('[data-testid="counter-value"]').should('have.text', '2');
+
+    cy.get('button[aria-label="Decrement"]').click();
+    cy.get('[data-testid="counter-value"]').should('have.text', '1');
+  });
+<% } -%>
+});

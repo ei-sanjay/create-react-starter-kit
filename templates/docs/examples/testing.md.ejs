@@ -31,11 +31,15 @@
 
 E2E base URL: `http://127.0.0.1:<%= buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173 %>`
 
-Playwright starts the bundler on that host/port (or reuses a local server already listening there). Keep only this project on that port while running e2e.
+Playwright always starts **this** project's bundler and refuses to reuse another process on the same URL. If the port is already taken, stop that process (`lsof -nP -iTCP:<port> -sTCP:LISTEN`) — webpack-dev-server will otherwise pick the next port while Playwright still talks to whatever answered first.
 <% } else if (e2eTesting === 'cypress') { -%>
 ```bash
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:install   # once (downloads the Cypress app binary)
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> cypress:open
 ```
+
+The `cypress` npm package is not enough — Cypress also needs the desktop binary under `~/Library/Caches/Cypress`. `pnpm`/`npm install` often skips that download; `test:e2e:install` runs `cypress install`.
 <% } -%>
 <% if (visualTesting === 'storybook') { -%>
 ```bash
@@ -50,7 +54,7 @@ Playwright starts the bundler on that host/port (or reuses a local server alread
 <% if (e2eTesting === 'playwright') { -%>
 - E2E: `tests/e2e/*.spec.<%= ext %>` (excluded from unit runner)
 <% } else if (e2eTesting === 'cypress') { -%>
-- E2E: `cypress/e2e/*`
+- E2E: `cypress/e2e/*.cy.<%= ext %>` (same journeys as Playwright: home, navigation, counter, posts, feedback)
 <% } -%>
 <% if (visualTesting === 'storybook') { -%>
 - Stories: `src/**/*.stories.<%= jsxExt %>`
@@ -66,7 +70,11 @@ Playwright starts the bundler on that host/port (or reuses a local server alread
   - mock `@/services/api` helpers rather than axios/fetch internals
 <% } -%>
 - Keep e2e **thin**: home load, posts happy path, feedback submit.
+<% if (e2eTesting === 'playwright') { -%>
 - Do not let unit tests import Playwright specs (unit config excludes `tests/e2e`).
+<% } else if (e2eTesting === 'cypress') { -%>
+- Do not let unit tests import Cypress specs (`cypress/`).
+<% } -%>
 - For async UI, prefer `findBy*` / `waitFor` over arbitrary `sleep`.
 
 ## Example unit test shape

@@ -1,8 +1,33 @@
 import { ROUTES } from '../../src/config/routes';
 
 describe('Home', () => {
-  it('loads the starter', () => {
+  it('loads hero and demo links', () => {
     cy.visit(ROUTES.HOME);
-    cy.contains('<%= projectName %>');
+    cy.contains('h1', /<%= projectName %>/i).should('be.visible');
+    cy.get('nav[aria-label="Primary"]').should('be.visible');
+    cy.contains('a', /Go to counter/i).should('be.visible');
+    cy.contains('a', /Go to posts/i).should('be.visible');
+    cy.contains('a', /Go to feedback/i).should('be.visible');
+  });
+});
+
+describe('Navigation', () => {
+  it('can visit each primary route', () => {
+    cy.visit(ROUTES.HOME);
+    cy.get('nav[aria-label="Primary"]').contains('a', /^Counter$/).click();
+    cy.url().should('include', ROUTES.COUNTER);
+    cy.contains('h1', 'Counter').should('be.visible');
+
+    cy.get('nav[aria-label="Primary"]').contains('a', /^Posts$/).click();
+    cy.url().should('include', ROUTES.POSTS);
+    cy.contains('h1', 'Posts').should('be.visible');
+
+    cy.get('nav[aria-label="Primary"]').contains('a', /^Feedback$/).click();
+    cy.url().should('include', ROUTES.FEEDBACK);
+    cy.contains('h1', 'Feedback').should('be.visible');
+
+    cy.get('nav[aria-label="Primary"]').contains('a', /^About$/).click();
+    cy.url().should('include', ROUTES.ABOUT);
+    cy.contains('h1', /About/i).should('be.visible');
   });
 });

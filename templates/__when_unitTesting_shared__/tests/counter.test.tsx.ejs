@@ -1,4 +1,8 @@
+<% if (unitTesting === 'vitest') { -%>
 import { describe, expect, it } from 'vitest';
+<% } else { -%>
+import { describe, expect, it } from '@jest/globals';
+<% } -%>
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CounterPanel } from '@/features/counter/CounterPanel';

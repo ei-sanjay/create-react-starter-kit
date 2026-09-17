@@ -1,10 +1,15 @@
+<% if (unitTesting === 'vitest') { -%>
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+<% } else { -%>
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+<% } -%>
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FeedbackForm } from '@/features/feedback/FeedbackForm';
 import { renderWithProviders } from './test-utils';
 
 <% if (serverState === 'rtk-query') { -%>
+<% if (unitTesting === 'vitest') { -%>
 const createFeedback = vi.fn(() => ({
   unwrap: vi.fn(async () => ({ id: 101 })),
 }));
@@ -17,6 +22,20 @@ vi.mock('@/store/postsApi', async (importOriginal) => {
   };
 });
 <% } else { -%>
+const createFeedback = jest.fn(() => ({
+  unwrap: jest.fn(async () => ({ id: 101 })),
+}));
+
+jest.mock('@/store/postsApi', () => {
+  const actual = jest.requireActual('@/store/postsApi')<% if (isTypeScript) { %> as typeof import('@/store/postsApi')<% } %>;
+  return {
+    ...actual,
+    useCreateFeedbackMutation: () => [createFeedback, { isLoading: false }],
+  };
+});
+<% } -%>
+<% } else { -%>
+<% if (unitTesting === 'vitest') { -%>
 vi.mock('@/services/api', async (importOriginal) => {
   const actual = await importOriginal<% if (isTypeScript) { %><typeof import('@/services/api')><% } %>();
   return {
@@ -24,11 +43,24 @@ vi.mock('@/services/api', async (importOriginal) => {
     createFeedback: vi.fn(async () => ({ id: 101 })),
   };
 });
+<% } else { -%>
+jest.mock('@/services/api', () => {
+  const actual = jest.requireActual('@/services/api')<% if (isTypeScript) { %> as typeof import('@/services/api')<% } %>;
+  return {
+    ...actual,
+    createFeedback: jest.fn(async () => ({ id: 101 })),
+  };
+});
+<% } -%>
 <% } -%>
 
 describe('FeedbackForm', () => {
   beforeEach(() => {
+<% if (unitTesting === 'vitest') { -%>
     vi.clearAllMocks();
+<% } else { -%>
+    jest.clearAllMocks();
+<% } -%>
   });
 
   it('shows validation errors when submitting empty values', async () => {

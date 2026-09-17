@@ -59,8 +59,6 @@
 <% if (visualTesting === 'storybook') { -%>
 - Storybook for isolated UI development and visual review.
 - Write stories for states (loading, empty, error, success), not only the happy path.
-<% } else if (visualTesting === 'chromatic') { -%>
-- Chromatic for visual regression against baselines.
 <% } -%>
 
 Aim for: fast unit tests on logic, fewer integration tests on features, thin e2e on happy paths.

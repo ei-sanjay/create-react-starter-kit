@@ -8,10 +8,9 @@ import { defineConfig, devices } from '@playwright/test';
  * - Webpack → 3000
  * - Rsbuild → 8080
  *
- * Locally, reuse an already-running server on the matching port (same as previous
- * working behavior). In CI always start a fresh server.
- * Bundlers use host 127.0.0.1 + strictPort so Playwright never waits forever on
- * a different auto-picked port.
+ * Never reuse another process on that port (a different local app can answer
+ * HTTP 200 and look like "the" server). Bundlers bind 127.0.0.1 with a fixed
+ * port so Playwright does not wait on a random fallback port.
  */
 <% const e2ePort = buildTool === 'webpack' ? 3000 : buildTool === 'rsbuild' ? 8080 : 5173; -%>
 <% const webServerCommand =
@@ -35,8 +34,10 @@ export default defineConfig({
   webServer: {
     command: '<%= webServerCommand %>',
     url: 'http://127.0.0.1:<%= e2ePort %>',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

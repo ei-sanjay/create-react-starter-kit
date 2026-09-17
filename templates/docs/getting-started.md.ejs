@@ -46,6 +46,9 @@ Useful scripts:
 <% if (e2eTesting !== 'none') { -%>
 | `test:e2e` | End-to-end tests |
 <% } -%>
+<% if (e2eTesting === 'playwright' || e2eTesting === 'cypress') { -%>
+| `test:e2e:install` | Download the <%= e2eTesting === 'playwright' ? 'Playwright browser' : 'Cypress app' %> binary (once) |
+<% } -%>
 <% if (visualTesting === 'storybook') { -%>
 | `storybook` | Component explorer |
 <% } -%>
@@ -110,7 +113,9 @@ Only client-safe variables (typically `VITE_*`) are exposed to the browser. Neve
 <% if (unitTesting !== 'none') { -%>
 - Unit: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test`
 <% } -%>
-<% if (e2eTesting !== 'none') { -%>
+<% if (e2eTesting === 'playwright' || e2eTesting === 'cypress') { -%>
+- E2E: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:install` (once), then `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e`
+<% } else if (e2eTesting !== 'none') { -%>
 - E2E: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e`
 <% } -%>
 <% if (visualTesting === 'storybook') { -%>

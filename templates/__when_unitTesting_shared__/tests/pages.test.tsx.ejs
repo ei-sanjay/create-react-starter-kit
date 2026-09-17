@@ -1,4 +1,8 @@
+<% if (unitTesting === 'vitest') { -%>
 import { describe, expect, it } from 'vitest';
+<% } else { -%>
+import { describe, expect, it } from '@jest/globals';
+<% } -%>
 import { screen } from '@testing-library/react';
 import { HomePage } from '@/routes/HomePage';
 import { AboutPage } from '@/routes/AboutPage';
