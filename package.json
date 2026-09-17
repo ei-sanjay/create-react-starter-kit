@@ -30,6 +30,7 @@
     "start": "node bin/create-react-starter-kit.js",
     "validate": "npm run build && node scripts/validate-cli.mjs",
     "prepublishOnly": "npm run build",
+    "release": "semantic-release",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
@@ -59,5 +60,8 @@
   "bugs": {
     "url": "https://github.com/ei-sanjay/create-react-starter-kit/issues"
   },
-  "homepage": "https://github.com/ei-sanjay/create-react-starter-kit#readme"
+  "homepage": "https://github.com/ei-sanjay/create-react-starter-kit#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

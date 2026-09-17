@@ -71,6 +71,31 @@ The generator follows the same order when it is allowed to install dependencies:
 
 If you pass `--skip-install`, run `git init` and then install yourself so Husky can create `.husky` internals and register the hooks.
 
+## Publishing (npm)
+
+Pushes to `main` run `.github/workflows/npm-publish.yml`: validate the CLI, then **semantic-release** bumps `package.json` and publishes.
+
+The bump is decided from commit messages **since the last Git tag** (`vX.Y.Z`):
+
+| Commit message | Version |
+|----------------|---------|
+| `feat: add webpack port lock` | **minor** (`2.0.0` → `2.1.0`) |
+| `fix: Cypress counter selector` | **patch** (`2.0.0` → `2.0.1`) |
+| `update: biome version` | **patch** |
+| `feat!: drop a prompt option` or a `BREAKING CHANGE:` footer | **major** (`2.0.0` → `3.0.0`) |
+| `docs:`, `chore:`, `test:`, `style:` | no release |
+
+Use Conventional Commits on `main`. Mix of `feat` + `fix` in one release takes the **highest** bump (minor wins over patch; major wins over both).
+
+Repo secret **`npm_token`** must be an npm [Automation token](https://docs.npmjs.com/creating-and-viewing-access-tokens) with publish rights.
+
+If `2.0.0` is already on npm, create a matching tag once so the next release is `2.0.1` instead of republishing:
+
+```bash
+git tag v2.0.0
+git push origin v2.0.0
+```
+
 ## License
 
 MIT
