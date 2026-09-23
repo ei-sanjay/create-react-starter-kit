@@ -1,6 +1,6 @@
 {
   "name": "create-react-starter-kit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Interactive CLI to scaffold a production-ready React app with your preferred stack",
   "keywords": [
     "react",
