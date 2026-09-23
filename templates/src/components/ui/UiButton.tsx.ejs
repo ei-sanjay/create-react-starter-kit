@@ -65,6 +65,9 @@ interface UiButtonProps {
   variant?: 'contained' | 'outlined' | 'text';
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  className?: string;
+  'aria-label'?: string;
+  'data-testid'?: string;
 }
 <% } -%>
 
@@ -74,9 +77,18 @@ export function UiButton({
   variant = 'contained',
   type = 'button',
   disabled,
+  className,
+  ...rest
 }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
   return (
-    <Button variant={variant} onClick={onClick} type={type} disabled={disabled}>
+    <Button
+      variant={variant}
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+      className={className}
+      {...rest}
+    >
       {children}
     </Button>
   );
@@ -86,21 +98,31 @@ export function UiButton({
 interface UiButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  type?: 'default' | 'primary' | 'dashed' | 'link' | 'text';
-  htmlType?: 'button' | 'submit' | 'reset';
+  type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  className?: string;
+  'aria-label'?: string;
+  'data-testid'?: string;
 }
 <% } -%>
 
 export function UiButton({
   children,
   onClick,
-  type = 'primary',
-  htmlType = 'button',
+  type = 'button',
   disabled,
+  className,
+  ...rest
 }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
   return (
-    <AntButton type={type} onClick={onClick} htmlType={htmlType} disabled={disabled}>
+    <AntButton
+      type="primary"
+      onClick={onClick}
+      htmlType={type}
+      disabled={disabled}
+      className={className}
+      {...rest}
+    >
       {children}
     </AntButton>
   );
@@ -112,12 +134,29 @@ interface UiButtonProps {
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  className?: string;
+  'aria-label'?: string;
+  'data-testid'?: string;
 }
 <% } -%>
 
-export function UiButton({ children, onClick, type = 'button', disabled }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
+export function UiButton({
+  children,
+  onClick,
+  type = 'button',
+  disabled,
+  className,
+  ...rest
+}<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
   return (
-    <ChakraButton colorPalette="blue" onClick={onClick} type={type} disabled={disabled}>
+    <ChakraButton
+      colorPalette="blue"
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+      className={className}
+      {...rest}
+    >
       {children}
     </ChakraButton>
   );
@@ -130,6 +169,8 @@ interface UiButtonProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   className?: string;
+  'aria-label'?: string;
+  'data-testid'?: string;
 }
 <% } -%>
 
@@ -139,6 +180,7 @@ export function UiButton({
   type = 'button',
   disabled,
   className,
+  ...rest
 }<% if (isTypeScript) { %>: UiButtonProps<% } %>) {
   return (
     <HeadlessButton
@@ -146,6 +188,7 @@ export function UiButton({
       onClick={onClick}
       disabled={disabled}
       className={cn('ui-button', className)}
+      {...rest}
     >
       {children}
     </HeadlessButton>

@@ -20,7 +20,10 @@
 ```bash
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test
 <%= packageManager === 'npm' ? 'npm run' : packageManager %> test:watch
+<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:coverage
 ```
+
+Coverage reports land in `coverage/` (text summary in the terminal, HTML + LCOV under that folder). Reports are gitignored.
 <% } -%>
 <% if (e2eTesting === 'playwright') { -%>
 ```bash

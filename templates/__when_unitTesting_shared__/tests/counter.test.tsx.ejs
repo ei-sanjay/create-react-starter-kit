@@ -1,14 +1,28 @@
 <% if (unitTesting === 'vitest') { -%>
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it<% if (stateManagement === 'redux' || stateManagement === 'zustand') { %>, beforeEach<% } %> } from 'vitest';
 <% } else { -%>
-import { describe, expect, it } from '@jest/globals';
+import { <% if (stateManagement === 'redux' || stateManagement === 'zustand') { %>beforeEach, <% } %>describe, expect, it } from '@jest/globals';
 <% } -%>
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CounterPanel } from '@/features/counter/CounterPanel';
 import { renderWithProviders } from './test-utils';
+<% if (stateManagement === 'redux') { -%>
+import { setValue, store } from '@/store';
+<% } else if (stateManagement === 'zustand') { -%>
+import { useCounterStore } from '@/store';
+<% } -%>
 
 describe('CounterPanel', () => {
+<% if (stateManagement === 'redux') { -%>
+  beforeEach(() => {
+    store.dispatch(setValue(0));
+  });
+<% } else if (stateManagement === 'zustand') { -%>
+  beforeEach(() => {
+    useCounterStore.setState({ value: 0 });
+  });
+<% } -%>
 <% if (stateManagement === 'none') { -%>
   it('shows guidance when no state library is selected', () => {
     renderWithProviders(<CounterPanel />);
@@ -21,20 +35,20 @@ describe('CounterPanel', () => {
 
     expect(screen.getByTestId('counter-value')).toHaveTextContent('0');
 
-    await user.click(screen.getByRole('button', { name: 'Increment' }));
+    await user.click(screen.getByTestId('counter-increment'));
     expect(screen.getByTestId('counter-value')).toHaveTextContent('1');
 
-    await user.click(screen.getByRole('button', { name: 'Increment' }));
+    await user.click(screen.getByTestId('counter-increment'));
     expect(screen.getByTestId('counter-value')).toHaveTextContent('2');
 
-    await user.click(screen.getByRole('button', { name: 'Decrement' }));
+    await user.click(screen.getByTestId('counter-decrement'));
     expect(screen.getByTestId('counter-value')).toHaveTextContent('1');
   });
 
-  it('exposes accessible button labels', () => {
+  it('exposes accessible increment/decrement controls', () => {
     renderWithProviders(<CounterPanel />);
-    expect(screen.getByRole('button', { name: 'Increment' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Decrement' })).toBeInTheDocument();
+    expect(screen.getByTestId('counter-increment')).toHaveAttribute('aria-label', 'Increment');
+    expect(screen.getByTestId('counter-decrement')).toHaveAttribute('aria-label', 'Decrement');
   });
 <% } -%>
 });

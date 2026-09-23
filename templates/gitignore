@@ -2,22 +2,25 @@
 node_modules/
 .pnp
 .pnp.js
+.pnp.cjs
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
+.pnpm-store/
 
-# Build / output
+# Build / bundler output (Vite, Webpack, Rsbuild)
 dist/
 build/
 out/
+.vite/
 .cache/
 .parcel-cache/
 .rsbuild/
 .turbo/
 *.tsbuildinfo
 
-# Env files (keep examples)
+# Env files (keep committed examples)
 .env
 .env.*
 !.env.example
@@ -30,11 +33,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Test / coverage
+# Unit test / coverage
 coverage/
+.nyc_output/
+junit.xml
+
+# Playwright
 playwright-report/
 playwright/.cache/
 test-results/
+blob-report/
+
+# Cypress
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
@@ -52,5 +62,7 @@ Thumbs.db
 
 # Misc
 *.local
+*.tgz
 .eslintcache
 .stylelintcache
+.husky/_

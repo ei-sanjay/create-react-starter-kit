@@ -109,6 +109,14 @@ async function formatGeneratedProjectWithBiome(targetDir: string): Promise<void>
   }
 }
 
+async function writeGitignore(targetDir: string, templatesRoot: string): Promise<void> {
+  const source = path.join(templatesRoot, 'gitignore');
+  if (!(await fs.pathExists(source))) {
+    return;
+  }
+  await fs.copy(source, path.join(targetDir, '.gitignore'));
+}
+
 function getTemplatesRoot(): string {
   // dist/generator -> ../../templates or ../templates depending on layout
   const candidates = [
@@ -316,11 +324,6 @@ function shouldIncludeTemplate(
     }
   }
 
-  // Language-specific templates (TypeScript only)
-  if (normalized.includes('__js__/')) {
-    return false;
-  }
-
   return true;
 }
 
@@ -332,13 +335,10 @@ function resolveOutputPath(
 
   // Strip conditional markers from path
   out = out.replace(/__when_[a-zA-Z0-9]+_[a-zA-Z0-9-]+__\//g, '');
-  out = out.replace(/__ts__\//g, '');
-  out = out.replace(/__js__\//g, '');
 
   // Extension placeholders
   out = out.replace(/\.tsx\.ejs$/, '.tsx');
   out = out.replace(/\.ts\.ejs$/, '.ts');
-  out = out.replace(/\.jsx\.ejs$/, '.jsx');
   out = out.replace(/\.js\.ejs$/, '.js');
   out = out.replace(/\.ejs$/, '');
 
@@ -362,6 +362,12 @@ function resolveOutputPath(
     answers.uiLibrary !== 'shadcn'
   ) {
     out = 'src/styles/global.scss';
+  }
+
+  // npm omits files named `.gitignore` from published packages, so the
+  // template is stored as `gitignore` and renamed here.
+  if (out === 'gitignore') {
+    return '.gitignore';
   }
 
   return out;
@@ -392,14 +398,6 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
       continue;
     }
 
-    // Skip build-tool specific configs that don't match
-    if (
-      outputRelative.startsWith('configs/') ||
-      file.relative.includes(`__when_buildTool_`) === false
-    ) {
-      // handled by when markers
-    }
-
     const isEjs = file.relative.endsWith('.ejs');
     const dest = path.join(answers.targetDir, outputRelative);
 
@@ -412,6 +410,8 @@ export async function generateProject(answers: ProjectAnswers): Promise<void> {
       await fs.copy(file.absolute, dest);
     }
   }
+
+  await writeGitignore(answers.targetDir, templatesRoot);
 
   // Generate package.json programmatically
   spinner.text = 'Writing package.json...';

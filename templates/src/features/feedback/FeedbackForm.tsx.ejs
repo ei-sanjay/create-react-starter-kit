@@ -4,21 +4,33 @@ import { useForm } from 'react-hook-form';
 <% if (validation === 'zod') { -%>
 import { zodResolver } from '@hookform/resolvers/zod';
 import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
-<% } else if (isTypeScript) { -%>
-import type { FeedbackValues } from '@/lib/validation';
+<% } else if (validation === 'yup') { -%>
+import { yupResolver } from '@hookform/resolvers/yup';
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else if (validation === 'valibot') { -%>
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else if (validation === 'joi') { -%>
+import { joiResolver } from '@hookform/resolvers/joi';
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else { -%>
+import { validateFeedback<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
 <% } -%>
 <% } else if (forms === 'formik') { -%>
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-<% if (validation === 'yup') { -%>
-import { feedbackSchema } from '@/lib/validation';
-<% } else if (validation === 'zod') { -%>
-import { feedbackSchema } from '@/lib/validation';
+<% if (validation === 'none') { -%>
+import { validateFeedback<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
+<% } else { -%>
+<% if (validation === 'valibot') { -%>
+import * as v from 'valibot';
 <% } -%>
-<% if (isTypeScript) { -%>
-import type { FeedbackValues } from '@/lib/validation';
+import { feedbackSchema<% if (isTypeScript) { %>, type FeedbackValues<% } %> } from '@/lib/validation';
 <% } -%>
 <% } else if (forms === 'tanstack-form') { -%>
 import { useForm } from '@tanstack/react-form';
+<% if (validation === 'valibot') { -%>
+import * as v from 'valibot';
+<% } -%>
 <% if (validation !== 'none') { -%>
 import { feedbackSchema } from '@/lib/validation';
 <% } -%>
@@ -59,24 +71,35 @@ export function FeedbackForm() {
     register,
     handleSubmit,
     reset,
+<% if (validation === 'none') { -%>
+    setError,
+<% } -%>
     formState: { errors, isSubmitting },
   } = useForm<% if (isTypeScript) { %><FeedbackValues><% } %>({
     defaultValues: defaults,
 <% if (validation === 'zod') { -%>
     resolver: zodResolver(feedbackSchema),
+<% } else if (validation === 'yup') { -%>
+    resolver: yupResolver(feedbackSchema),
+<% } else if (validation === 'valibot') { -%>
+    resolver: valibotResolver(feedbackSchema),
+<% } else if (validation === 'joi') { -%>
+    resolver: joiResolver(feedbackSchema),
 <% } -%>
   });
 
   const onSubmit = async (values<% if (isTypeScript) { %>: FeedbackValues<% } %>) => {
-<% if (validation === 'yup') { -%>
-    await feedbackSchema.validate(values, { abortEarly: false });
-<% } else if (validation === 'valibot') { -%>
-    const { parse } = await import('valibot');
-    parse(feedbackSchema, values);
-<% } else if (validation === 'joi') { -%>
-    const result = feedbackSchema.validate(values, { abortEarly: false });
-    if (result.error) {
-      throw result.error;
+<% if (validation === 'none') { -%>
+    const nextErrors = validateFeedback(values);
+    const keys = Object.keys(nextErrors);
+    if (keys.length) {
+      keys.forEach((key) => {
+        const message = nextErrors[<% if (isTypeScript) { %>key as keyof FeedbackValues<% } else { %>key<% } %>];
+        if (message) {
+          setError(<% if (isTypeScript) { %>key as keyof FeedbackValues<% } else { %>key<% } %>, { type: 'manual', message });
+        }
+      });
+      return;
     }
 <% } -%>
     await createFeedback(values);
@@ -112,7 +135,7 @@ export function FeedbackForm() {
           <textarea rows={4} {...register('message')} placeholder="What should we improve?" />
           {errors.message && <span className="field-error">{errors.message.message}</span>}
         </label>
-        <UiButton type="submit" disabled={isSubmitting}>
+        <UiButton type="submit" disabled={isSubmitting} data-testid="feedback-submit">
           {isSubmitting ? 'Sending…' : 'Send feedback'}
         </UiButton>
       </form>
@@ -145,11 +168,50 @@ export function FeedbackForm() {
         initialValues={defaults}
 <% if (validation === 'yup') { -%>
         validationSchema={feedbackSchema}
+<% } else if (validation === 'zod') { -%>
+        validate={(values) => {
+          const parsed = feedbackSchema.safeParse(values);
+          if (parsed.success) {
+            return {};
+          }
+          return Object.fromEntries(
+            parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message]),
+          );
+        }}
+<% } else if (validation === 'valibot') { -%>
+        validate={(values) => {
+          const parsed = v.safeParse(feedbackSchema, values);
+          if (parsed.success) {
+            return {};
+          }
+          return Object.fromEntries(
+            parsed.issues.map((issue) => {
+              const segment = issue.path?.[0];
+              const key =
+                segment && typeof segment === 'object' && 'key' in segment
+                  ? String(segment.key)
+                  : 'name';
+              return [key, issue.message];
+            }),
+          );
+        }}
+<% } else if (validation === 'joi') { -%>
+        validate={(values) => {
+          const result = feedbackSchema.validate(values, { abortEarly: false });
+          if (!result.error) {
+            return {};
+          }
+          return Object.fromEntries(
+            result.error.details.map((d<% if (isTypeScript) { %>: { path: (string | number)[]; message: string }<% } %>) => [
+              String(d.path[0]),
+              d.message,
+            ]),
+          );
+        }}
+<% } else { -%>
+        validate={(values) => validateFeedback(values)}
 <% } -%>
         onSubmit={async (values, helpers) => {
-<% if (validation === 'zod') { -%>
-          feedbackSchema.parse(values);
-<% } -%>
           await createFeedback(values);
           setStatus('Feedback submitted successfully (demo API).');
           helpers.resetForm();
@@ -172,7 +234,7 @@ export function FeedbackForm() {
               <Field as="textarea" rows={4} name="message" placeholder="What should we improve?" />
               <ErrorMessage name="message" component="span" className="field-error" />
             </label>
-            <UiButton type="submit" disabled={isSubmitting}>
+            <UiButton type="submit" disabled={isSubmitting} data-testid="feedback-submit">
               {isSubmitting ? 'Sending…' : 'Send feedback'}
             </UiButton>
           </Form>
@@ -191,20 +253,59 @@ export function FeedbackForm() {
     </article>
   );
 <% } else if (forms === 'tanstack-form') { -%>
+  const [submitErrors, setSubmitErrors] = useState<% if (isTypeScript) { %><Partial<Record<keyof FeedbackValues, string>>><% } else { %><Record<string, string>><% } %>({});
   const form = useForm({
     defaultValues: defaults,
     onSubmit: async ({ value }) => {
+      const nextErrors<% if (isTypeScript) { %>: Partial<Record<keyof FeedbackValues, string>><% } %> = {};
 <% if (validation === 'zod') { -%>
-      feedbackSchema.parse(value);
+      const parsed = feedbackSchema.safeParse(value);
+      if (!parsed.success) {
+        parsed.error.issues.forEach((issue) => {
+          nextErrors[<% if (isTypeScript) { %>String(issue.path[0]) as keyof FeedbackValues<% } else { %>String(issue.path[0])<% } %>] = issue.message;
+        });
+      }
 <% } else if (validation === 'yup') { -%>
-      await feedbackSchema.validate(value);
+      try {
+        await feedbackSchema.validate(value, { abortEarly: false });
+      } catch (err) {
+        if (err && typeof err === 'object' && 'inner' in err) {
+          (err<% if (isTypeScript) { %> as { inner: Array<{ path?: string; message: string }> }<% } %>).inner.forEach((e) => {
+            if (e.path) {
+              nextErrors[<% if (isTypeScript) { %>e.path as keyof FeedbackValues<% } else { %>e.path<% } %>] = e.message;
+            }
+          });
+        }
+      }
 <% } else if (validation === 'valibot') { -%>
-      const { parse } = await import('valibot');
-      parse(feedbackSchema, value);
+      const parsed = v.safeParse(feedbackSchema, value);
+      if (!parsed.success) {
+        parsed.issues.forEach((issue) => {
+          const segment = issue.path?.[0];
+          const key =
+            segment && typeof segment === 'object' && 'key' in segment
+              ? String(segment.key)
+              : 'name';
+          nextErrors[<% if (isTypeScript) { %>key as keyof FeedbackValues<% } else { %>key<% } %>] = issue.message;
+        });
+      }
 <% } else if (validation === 'joi') { -%>
-      const result = feedbackSchema.validate(value);
-      if (result.error) throw result.error;
+      const result = feedbackSchema.validate(value, { abortEarly: false });
+      if (result.error) {
+        result.error.details.forEach((d<% if (isTypeScript) { %>: { path: (string | number)[]; message: string }<% } %>) => {
+          nextErrors[<% if (isTypeScript) { %>String(d.path[0]) as keyof FeedbackValues<% } else { %>String(d.path[0])<% } %>] =
+            d.message;
+        });
+      }
+<% } else if (validation === 'none') { -%>
+      if (!value.name || value.name.length < 2) nextErrors.name = 'Name must be at least 2 characters';
+      if (!value.email || !value.email.includes('@')) nextErrors.email = 'Enter a valid email';
+      if (!value.message || value.message.length < 10) nextErrors.message = 'Message must be at least 10 characters';
 <% } -%>
+      setSubmitErrors(nextErrors);
+      if (Object.keys(nextErrors).length) {
+        return;
+      }
       await createFeedback(value);
       setStatus('Feedback submitted successfully (demo API).');
       form.reset();
@@ -225,6 +326,7 @@ export function FeedbackForm() {
       </header>
       <form
         className="feedback-form"
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -241,6 +343,7 @@ export function FeedbackForm() {
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="Ada Lovelace"
               />
+              {submitErrors.name && <span className="field-error">{submitErrors.name}</span>}
             </label>
           )}
         </form.Field>
@@ -255,6 +358,7 @@ export function FeedbackForm() {
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="ada@example.com"
               />
+              {submitErrors.email && <span className="field-error">{submitErrors.email}</span>}
             </label>
           )}
         </form.Field>
@@ -269,10 +373,11 @@ export function FeedbackForm() {
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="What should we improve?"
               />
+              {submitErrors.message && <span className="field-error">{submitErrors.message}</span>}
             </label>
           )}
         </form.Field>
-        <UiButton type="submit">Send feedback</UiButton>
+        <UiButton type="submit" data-testid="feedback-submit">Send feedback</UiButton>
       </form>
       {status && (
         <p className="success-text" aria-live="polite" data-testid="feedback-success">
@@ -382,7 +487,7 @@ export function FeedbackForm() {
           />
           {errors.message && <span className="field-error">{errors.message}</span>}
         </label>
-        <UiButton type="submit" disabled={isSubmitting}>
+        <UiButton type="submit" disabled={isSubmitting} data-testid="feedback-submit">
           {isSubmitting ? 'Sending…' : 'Send feedback'}
         </UiButton>
       </form>

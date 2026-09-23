@@ -14,7 +14,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
   const dependencies: Record<string, string> = { ...REACT };
   const devDependencies: Record<string, string> = {};
 
-  const isTs = answers.language === 'typescript';
+  const isTs = true; // scaffolds are TypeScript-only
 
   // Build tools
   switch (answers.buildTool) {
@@ -101,7 +101,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
   switch (answers.forms) {
     case 'react-hook-form':
       dependencies['react-hook-form'] = '^7.54.2';
-      if (answers.validation === 'zod') {
+      if (answers.validation !== 'none') {
         dependencies['@hookform/resolvers'] = '^4.1.3';
       }
       break;
@@ -186,6 +186,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
     case 'vitest':
       // RTL is the component-testing layer; Vitest is the runner — always pair them.
       devDependencies['vitest'] = '^3.0.8';
+      devDependencies['@vitest/coverage-v8'] = '^3.0.8';
       devDependencies['@testing-library/react'] = '^16.2.0';
       devDependencies['@testing-library/jest-dom'] = '^6.6.3';
       devDependencies['@testing-library/user-event'] = '^14.6.1';
@@ -220,6 +221,7 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
       break;
     case 'cypress':
       devDependencies['cypress'] = '^14.2.0';
+      devDependencies['start-server-and-test'] = '^2.0.11';
       break;
   }
 
@@ -298,8 +300,6 @@ export function resolveDependencies(answers: ProjectAnswers): DependencySets {
 
 export function buildScripts(answers: ProjectAnswers): Record<string, string> {
   const scripts: Record<string, string> = {};
-  const isTs = answers.language === 'typescript';
-  const entry = isTs ? 'src/main.tsx' : 'src/main.jsx';
 
   switch (answers.buildTool) {
     case 'vite':
@@ -328,8 +328,7 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
   }
 
   if (answers.formatting === 'prettier') {
-    const srcExt =
-      answers.language === 'typescript' ? 'ts,tsx' : 'js,jsx';
+    const srcExt = 'ts,tsx';
     const prettierGlobs = [
       `"src/**/*.{${srcExt},css,scss,md,json}"`,
       `"tests/**/*.{${srcExt}}"`,
@@ -344,22 +343,20 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     }
     const joined = prettierGlobs.join(' ');
     scripts.format = `prettier --write ${joined}`;
-    scripts['format:fix'] = scripts.format;
-    scripts['format:check'] = `prettier --check ${joined}`;
   } else if (answers.linting === 'biome') {
     scripts.format = 'biome format --write .';
-    scripts['format:fix'] = scripts.format;
-    scripts['format:check'] = 'biome format .';
   }
 
   switch (answers.unitTesting) {
     case 'vitest':
       scripts.test = 'vitest run';
       scripts['test:watch'] = 'vitest';
+      scripts['test:coverage'] = 'vitest run --coverage';
       break;
     case 'jest':
       scripts.test = 'jest';
       scripts['test:watch'] = 'jest --watch';
+      scripts['test:coverage'] = 'jest --coverage';
       break;
     default:
       scripts.test = 'node -e "console.log(\'No unit tests configured\')"';
@@ -371,9 +368,20 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
     scripts['test:e2e:ui'] = 'playwright test --ui';
     scripts['test:e2e:install'] = 'playwright install chromium';
   } else if (answers.e2eTesting === 'cypress') {
-    scripts['test:e2e'] = 'cypress run';
+    const e2ePort =
+      answers.buildTool === 'webpack' ? 3000 : answers.buildTool === 'rsbuild' ? 8080 : 5173;
+    const webServerCommand =
+      answers.buildTool === 'webpack'
+        ? 'npx webpack serve --mode development --host 127.0.0.1 --port 3000'
+        : answers.buildTool === 'rsbuild'
+          ? 'npx rsbuild dev --host 127.0.0.1 --port 8080'
+          : 'npx vite --host 127.0.0.1 --port 5173 --strictPort';
+    scripts['test:e2e'] =
+      `start-server-and-test "${webServerCommand}" http://127.0.0.1:${e2ePort} "cypress run"`;
     scripts['test:e2e:install'] = 'cypress install';
-    scripts['cypress:open'] = 'cypress open';
+    // Cypress needs the app server; without this, open/run hit a blank baseUrl.
+    scripts['cypress:open'] =
+      `start-server-and-test "${webServerCommand}" http://127.0.0.1:${e2ePort} "cypress open"`;
   }
 
   if (answers.visualTesting === 'storybook') {
@@ -382,9 +390,6 @@ export function buildScripts(answers: ProjectAnswers): Record<string, string> {
   }
 
   scripts.prepare = 'husky';
-
-  // silence unused
-  void entry;
 
   return scripts;
 }

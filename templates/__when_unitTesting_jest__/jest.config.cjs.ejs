@@ -12,6 +12,15 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|scss)$': '<rootDir>/tests/styleMock.<%= ext %>',
   },
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx,js,jsx}',
+    '!src/**/*.d.ts',
+    '!src/**/*.stories.*',
+    '!src/main.{ts,tsx,js,jsx}',
+    '!src/vite-env.d.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'html', 'lcov'],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',

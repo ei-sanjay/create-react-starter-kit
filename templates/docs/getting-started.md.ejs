@@ -42,6 +42,7 @@ Useful scripts:
 | `preview` | Serve the production build locally |
 <% if (unitTesting !== 'none') { -%>
 | `test` / `test:watch` | Unit tests |
+| `test:coverage` | Unit tests with coverage report (`coverage/`) |
 <% } -%>
 <% if (e2eTesting !== 'none') { -%>
 | `test:e2e` | End-to-end tests |
@@ -112,6 +113,7 @@ Only client-safe variables (typically `VITE_*`) are exposed to the browser. Neve
 
 <% if (unitTesting !== 'none') { -%>
 - Unit: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test`
+- Coverage: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:coverage` (writes `coverage/`)
 <% } -%>
 <% if (e2eTesting === 'playwright' || e2eTesting === 'cypress') { -%>
 - E2E: `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e:install` (once), then `<%= packageManager === 'npm' ? 'npm run' : packageManager %> test:e2e`

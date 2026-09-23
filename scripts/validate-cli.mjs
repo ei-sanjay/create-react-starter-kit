@@ -40,6 +40,7 @@ const required = [
   'src/App.tsx',
   'src/providers.tsx',
   'src/routes/HomePage.tsx',
+  '.gitignore',
   'docs/getting-started.md',
   'docs/architecture.md',
   'docs/best-practices.md',
